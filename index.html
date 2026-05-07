@@ -5,17 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>موقع محل النسرين - متصل بـ Firebase</title>
     <style>
-      html, body { height: 100%; margin: 0; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; }
       #root { height: 100%; }
+      #firebase-status {
+        background: #4caf50;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+      }
     </style>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK - الاتصال مباشرة -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
       import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-      // إعدادات مشروع Firebase (من صورتك)
       const firebaseConfig = {
         apiKey: "AIzaSyC7B5Xm6uY07VZiZXTQ4ztAqpSE3n_8A3E",
         authDomain: "alnisrine-e531d.firebaseapp.com",
@@ -26,31 +39,25 @@
         measurementId: "G-PJQZKV54DP"
       };
 
-      // تهيئة Firebase
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      console.log("✅ Firebase متصل بنجاح", app.name);
+      // تحديث شريط الحالة
+      const statusDiv = document.getElementById("firebase-status");
+      if (statusDiv) {
+        statusDiv.innerHTML = "✅ Firebase متصل بنجاح - جاهز للعمل";
+        statusDiv.style.background = "#2e7d32";
+      }
 
-      // (اختياري) مثال لجلب بيانات من Firestore إذا وجدت مجموعة "products"
-      // يمكنك تفعيل هذا الكود لاحقاً
-      // async function testFirestore() {
-      //   const querySnapshot = await getDocs(collection(db, "products"));
-      //   querySnapshot.forEach((doc) => {
-      //     console.log(doc.id, doc.data());
-      //   });
-      // }
-      // testFirestore();
-
-      // جعل الكائنات متاحة في وحدة التحكم للاختبار
+      console.log("Firebase initialized", app.name);
       window.db = db;
       window.auth = auth;
     </script>
   </head>
   <body>
+    <div id="firebase-status">🔥 جاري الاتصال بـ Firebase...</div>
     <div id="root"></div>
-    <!-- باقي تطبيق React (main.tsx) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
