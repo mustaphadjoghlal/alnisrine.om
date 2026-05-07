@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC7B5Xm6uY07VZiZXTQ4ztAqpSE3n_8A3E",
@@ -15,4 +16,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export default app;
+export const storage = getStorage(app);
+
+// دالة رفع الصور إلى Firebase Storage
+export async function uploadProductImage(file: File, productName: string): Promise<string> {
+  const extension = file.name.split('.').pop();
+  const fileName = `${productName.replace(/\s/g, '_')}_${Date.now()}.${extension}`;
+  const storageRef = ref(storage, `products/${fileName}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
