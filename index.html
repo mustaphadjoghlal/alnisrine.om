@@ -1,16 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>موقع محل النسرين - متصل بـ Firebase</title>
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #root { height: 100%; }
+    </style>
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>موقع لمحل النسرين</title>
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-    </head>
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+      // إعدادات مشروع Firebase (من صورتك)
+      const firebaseConfig = {
+        apiKey: "AIzaSyC7B5Xm6uY07VZiZXTQ4ztAqpSE3n_8A3E",
+        authDomain: "alnisrine-e531d.firebaseapp.com",
+        projectId: "alnisrine-e531d",
+        storageBucket: "alnisrine-e531d.firebasestorage.app",
+        messagingSenderId: "81259688625",
+        appId: "1:81259688625:web:3c8b66d647d0de7658e890",
+        measurementId: "G-PJQZKV54DP"
+      };
+
+      // تهيئة Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      console.log("✅ Firebase متصل بنجاح", app.name);
+
+      // (اختياري) مثال لجلب بيانات من Firestore إذا وجدت مجموعة "products"
+      // يمكنك تفعيل هذا الكود لاحقاً
+      // async function testFirestore() {
+      //   const querySnapshot = await getDocs(collection(db, "products"));
+      //   querySnapshot.forEach((doc) => {
+      //     console.log(doc.id, doc.data());
+      //   });
+      // }
+      // testFirestore();
+
+      // جعل الكائنات متاحة في وحدة التحكم للاختبار
+      window.db = db;
+      window.auth = auth;
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- باقي تطبيق React (main.tsx) -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
