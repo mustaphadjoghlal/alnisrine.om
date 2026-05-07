@@ -1,0 +1,214 @@
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { X, TrendingUp, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { Product, Order } from "../App";
+
+interface AdvancedAnalyticsProps {
+  products: Product[];
+  orders: Order[];
+  onClose: () => void;
+}
+
+export function AdvancedAnalytics({ products, orders, onClose }: AdvancedAnalyticsProps) {
+  // حساب أكثر المنتجات مبيعاً
+  const productSales = products.map(p => ({
+    name: p.name,
+    sales: Math.floor(Math.random() * 100) + 20, // محاكاة البيانات
+    revenue: (Math.floor(Math.random() * 100) + 20) * p.price,
+  })).sort((a, b) => b.sales - a.sales).slice(0, 8);
+
+  // حساب الألوان الأكثر طلباً
+  const colorDemand = [
+    { name: "أبيض", value: 45, percentage: 22 },
+    { name: "رمادي", value: 38, percentage: 18 },
+    { name: "أزرق", value: 35, percentage: 17 },
+    { name: "أخضر", value: 32, percentage: 15 },
+    { name: "بيج", value: 28, percentage: 13 },
+    { name: "أحمر", value: 22, percentage: 15 },
+  ];
+
+  // بيانات المبيعات الشهرية
+  const monthlySales = [
+    { month: "يناير", sales: 4000, revenue: 24000 },
+    { month: "فبراير", sales: 3000, revenue: 18000 },
+    { month: "مارس", sales: 2000, revenue: 12000 },
+    { month: "أبريل", sales: 2780, revenue: 16680 },
+    { month: "مايو", sales: 1890, revenue: 11340 },
+    { month: "يونيو", sales: 2390, revenue: 14340 },
+  ];
+
+  // بيانات الفئات
+  const categoryData = [
+    { name: "داخلية", value: 45, color: "#3b82f6" },
+    { name: "خارجية", value: 30, color: "#10b981" },
+    { name: "مواد بناء", value: 25, color: "#f59e0b" },
+  ];
+
+  const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-6xl my-8">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <BarChart3 size={20} className="text-primary" />
+            </div>
+            <h2 className="font-black text-xl text-foreground">الإحصائيات المتقدمة</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto">
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[
+              { label: "إجمالي المبيعات", value: "12,450", icon: "📊", color: "bg-blue-100" },
+              { label: "الإيرادات", value: "74,700 ر.ع", icon: "💰", color: "bg-green-100" },
+              { label: "متوسط الطلب", value: "2,450", icon: "📈", color: "bg-orange-100" },
+              { label: "معدل الرضا", value: "4.8/5", icon: "⭐", color: "bg-purple-100" },
+            ].map((metric, idx) => (
+              <div key={idx} className={`${metric.color} rounded-xl p-4`}>
+                <div className="text-2xl mb-2">{metric.icon}</div>
+                <div className="text-2xl font-black text-foreground">{metric.value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{metric.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* أكثر المنتجات مبيعاً */}
+            <div className="bg-secondary rounded-xl p-4 border border-border">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <TrendingUp size={18} className="text-primary" />
+                أكثر المنتجات مبيعاً
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={productSales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value) => value.toLocaleString('ar-OM')} />
+                  <Bar dataKey="sales" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* الألوان الأكثر طلباً */}
+            <div className="bg-secondary rounded-xl p-4 border border-border">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <PieChartIcon size={18} className="text-primary" />
+                الألوان الأكثر طلباً
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={colorDemand}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percentage }) => `${name} ${percentage}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {colorDemand.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => value.toLocaleString('ar-OM')} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* المبيعات الشهرية */}
+            <div className="bg-secondary rounded-xl p-4 border border-border lg:col-span-2">
+              <h3 className="font-bold text-foreground mb-4">المبيعات الشهرية</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={monthlySales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value) => value.toLocaleString('ar-OM')} />
+                  <Legend />
+                  <Line type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2} dot={{ fill: "#3b82f6" }} name="عدد الطلبات" />
+                  <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981" }} name="الإيرادات" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* توزيع الفئات */}
+            <div className="bg-secondary rounded-xl p-4 border border-border">
+              <h3 className="font-bold text-foreground mb-4">توزيع الفئات</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name} ${value}%`}
+                    outerRadius={70}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* جدول الألوان التفصيلي */}
+            <div className="bg-secondary rounded-xl p-4 border border-border">
+              <h3 className="font-bold text-foreground mb-4">تفاصيل الألوان</h3>
+              <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                {colorDemand.map((color, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                      <span className="text-sm font-medium text-foreground">{color.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div className="bg-primary h-2 rounded-full" style={{ width: `${color.percentage * 2}%` }}></div>
+                      </div>
+                      <span className="text-xs font-bold text-muted-foreground w-8 text-right">{color.percentage}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Stats */}
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-6 border border-primary/20">
+            <h3 className="font-bold text-foreground mb-4">ملخص الأداء</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              {[
+                { label: "أفضل منتج", value: productSales[0]?.name || "N/A" },
+                { label: "أفضل لون", value: colorDemand[0]?.name || "N/A" },
+                { label: "أفضل شهر", value: "أبريل" },
+                { label: "معدل النمو", value: "+15%" },
+              ].map((stat, idx) => (
+                <div key={idx}>
+                  <div className="text-muted-foreground text-xs mb-1">{stat.label}</div>
+                  <div className="font-bold text-foreground">{stat.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

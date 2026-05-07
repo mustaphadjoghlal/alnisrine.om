@@ -1,0 +1,411 @@
+import { useState, useMemo } from "react";
+import { X, Star, Upload, Trash2, Check } from "lucide-react";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+export interface Review {
+  id: string;
+  productId: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  images: string[];
+  createdAt: number;
+  verified: boolean;
+}
+
+interface ReviewsModalProps {
+  productId: string;
+  productName: string;
+  reviews: Review[];
+  onAddReview: (review: Omit<Review, "id" | "createdAt">) => void;
+  onDeleteReview: (reviewId: string) => void;
+  onClose: () => void;
+}
+
+interface ReviewFormProps {
+  productId: string;
+  onSubmit: (review: Omit<Review, "id" | "createdAt">) => void;
+  onCancel: () => void;
+}
+
+// ─── Star Rating Input ────────────────────────────────────────────────────────
+function StarRatingInput({
+  rating,
+  onRatingChange,
+}: {
+  rating: number;
+  onRatingChange: (rating: number) => void;
+}) {
+  return (
+    <div className="flex gap-2">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <button
+          key={i}
+          onClick={() => onRatingChange(i)}
+          className="transition-transform hover:scale-110"
+        >
+          <Star
+            size={24}
+            className={i <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Review Form Component ────────────────────────────────────────────────────
+function ReviewForm({ productId, onSubmit, onCancel }: ReviewFormProps) {
+  const [customerName, setCustomerName] = useState("");
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [imageInput, setImageInput] = useState("");
+
+  const handleAddImage = () => {
+    if (imageInput.trim() && images.length < 3) {
+      setImages([...images, imageInput.trim()]);
+      setImageInput("");
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    if (!customerName.trim() || !comment.trim()) {
+      alert("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    onSubmit({
+      productId,
+      customerName: customerName.trim(),
+      rating,
+      comment: comment.trim(),
+      images,
+      verified: false,
+    });
+
+    setCustomerName("");
+    setRating(5);
+    setComment("");
+    setImages([]);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-sm font-semibold text-foreground mb-2 block">
+          اسمك *
+        </label>
+        <input
+          type="text"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          placeholder="أدخل اسمك"
+          className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-semibold text-foreground mb-2 block">
+          التقييم *
+        </label>
+        <StarRatingInput rating={rating} onRatingChange={setRating} />
+      </div>
+
+      <div>
+        <label className="text-sm font-semibold text-foreground mb-2 block">
+          تعليقك *
+        </label>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="شارك تجربتك مع هذا المنتج..."
+          rows={4}
+          className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-semibold text-foreground mb-2 block">
+          صور المشروع (حتى 3 صور)
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={imageInput}
+            onChange={(e) => setImageInput(e.target.value)}
+            placeholder="رابط الصورة (URL)"
+            className="flex-1 border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            dir="ltr"
+          />
+          <button
+            onClick={handleAddImage}
+            disabled={images.length >= 3}
+            className="bg-primary text-primary-foreground px-3 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
+            <Upload size={14} />
+            إضافة
+          </button>
+        </div>
+
+        {images.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {images.map((image, idx) => (
+              <div key={idx} className="relative group">
+                <img
+                  src={image}
+                  alt={`صورة ${idx + 1}`}
+                  className="w-full h-20 object-cover rounded-lg border border-border"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23e5e7eb' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%236b7280' font-size='12'%3EError%3C/text%3E%3C/svg%3E";
+                  }}
+                />
+                <button
+                  onClick={() => handleRemoveImage(idx)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <button
+          onClick={handleSubmit}
+          className="flex-1 bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+        >
+          <Check size={16} />
+          إرسال التقييم
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-6 py-3 border border-border rounded-lg text-foreground font-semibold hover:bg-secondary transition-colors text-sm"
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Reviews Display Component ────────────────────────────────────────────────
+function ReviewCard({
+  review,
+  onDelete,
+}: {
+  review: Review;
+  onDelete: (id: string) => void;
+}) {
+  const date = new Date(review.createdAt).toLocaleDateString("ar-SA");
+
+  return (
+    <div className="bg-secondary rounded-lg p-4 border border-border">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-semibold text-foreground">{review.customerName}</h4>
+            {review.verified && (
+              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Check size={10} />
+                موثق
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{date}</p>
+        </div>
+        <button
+          onClick={() => onDelete(review.id)}
+          className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      <div className="flex gap-1 mb-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Star
+            key={i}
+            size={14}
+            className={
+              i <= review.rating
+                ? "fill-amber-400 text-amber-400"
+                : "fill-gray-200 text-gray-200"
+            }
+          />
+        ))}
+      </div>
+
+      <p className="text-sm text-foreground mb-3">{review.comment}</p>
+
+      {review.images.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {review.images.map((image, idx) => (
+            <img
+              key={idx}
+              src={image}
+              alt={`صورة التقييم ${idx + 1}`}
+              className="w-full h-16 object-cover rounded-lg border border-border"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23e5e7eb' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%236b7280' font-size='12'%3EError%3C/text%3E%3C/svg%3E";
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Reviews Modal Component ──────────────────────────────────────────────────
+export function ReviewsModal({
+  productId,
+  productName,
+  reviews,
+  onAddReview,
+  onDeleteReview,
+  onClose,
+}: ReviewsModalProps) {
+  const [showForm, setShowForm] = useState(false);
+
+  const productReviews = useMemo(
+    () => reviews.filter((r) => r.productId === productId),
+    [reviews, productId]
+  );
+
+  const avgRating = useMemo(() => {
+    if (productReviews.length === 0) return 0;
+    const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
+    return (sum / productReviews.length).toFixed(1);
+  }, [productReviews]);
+
+  const ratingDistribution = useMemo(() => {
+    const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    productReviews.forEach((r) => {
+      dist[r.rating as keyof typeof dist]++;
+    });
+    return dist;
+  }, [productReviews]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-black text-foreground">{productName}</h2>
+            <p className="text-sm text-muted-foreground mt-1">التقييمات والمراجعات</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Rating Summary */}
+        {productReviews.length > 0 && (
+          <div className="bg-secondary rounded-xl p-4 mb-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-3xl font-black text-primary">{avgRating}</span>
+                  <span className="text-sm text-muted-foreground">من 5</span>
+                </div>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className={
+                        i <= Math.round(parseFloat(avgRating as string))
+                          ? "fill-amber-400 text-amber-400"
+                          : "fill-gray-200 text-gray-200"
+                      }
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {productReviews.length} تقييم
+                </p>
+              </div>
+              <div className="space-y-1">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <div key={rating} className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-6">{rating}★</span>
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 transition-all"
+                        style={{
+                          width: `${
+                            productReviews.length > 0
+                              ? (ratingDistribution[rating as keyof typeof ratingDistribution] /
+                                  productReviews.length) *
+                                100
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground w-6">
+                      {ratingDistribution[rating as keyof typeof ratingDistribution]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Review Button */}
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors mb-6"
+          >
+            + إضافة تقييم
+          </button>
+        )}
+
+        {/* Review Form */}
+        {showForm && (
+          <div className="bg-secondary rounded-xl p-4 mb-6">
+            <ReviewForm
+              productId={productId}
+              onSubmit={(review) => {
+                onAddReview(review);
+                setShowForm(false);
+              }}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        )}
+
+        {/* Reviews List */}
+        <div className="space-y-4">
+          {productReviews.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>لا توجد تقييمات حتى الآن</p>
+              <p className="text-sm mt-1">كن أول من يقيم هذا المنتج</p>
+            </div>
+          ) : (
+            productReviews
+              .sort((a, b) => b.createdAt - a.createdAt)
+              .map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onDelete={onDeleteReview}
+                />
+              ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

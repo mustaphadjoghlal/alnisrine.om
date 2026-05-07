@@ -1,0 +1,408 @@
+import { useState, useMemo } from "react";
+import { X, AlertTriangle, Package, TrendingUp, Users, Eye, Trash2, Check, Clock, Truck } from "lucide-react";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+export interface Order {
+  id: string;
+  customerName: string;
+  items: { productId: string; productName: string; quantity: number; price: number }[];
+  total: number;
+  status: "pending" | "processing" | "shipped" | "completed";
+  createdAt: number;
+  notes?: string;
+}
+
+export interface Admin {
+  id: string;
+  username: string;
+  role: "owner" | "manager" | "staff";
+  permissions: {
+    viewProducts: boolean;
+    editProducts: boolean;
+    viewOrders: boolean;
+    editOrders: boolean;
+    viewStats: boolean;
+    viewAdmins: boolean;
+    editAdmins: boolean;
+  };
+  createdAt: number;
+}
+
+interface InventoryAlertProps {
+  products: any[];
+  onClose: () => void;
+}
+
+interface OrderTrackingProps {
+  orders: Order[];
+  onUpdateOrder: (orderId: string, status: Order["status"]) => void;
+  onDeleteOrder: (orderId: string) => void;
+  onClose: () => void;
+}
+
+interface AdminManagementProps {
+  admins: Admin[];
+  currentAdminRole: string;
+  onAddAdmin: (admin: Admin) => void;
+  onDeleteAdmin: (adminId: string) => void;
+  onClose: () => void;
+}
+
+// ─── Inventory Alert Component ────────────────────────────────────────────────
+export function InventoryAlert({ products, onClose }: InventoryAlertProps) {
+  const lowStockProducts = useMemo(
+    () => products.filter((p) => p.stock < 5 && p.inStock),
+    [products]
+  );
+
+  const outOfStockProducts = useMemo(
+    () => products.filter((p) => !p.inStock),
+    [products]
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-100 p-2 rounded-lg">
+              <AlertTriangle className="text-amber-600" size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-foreground">تنبيهات المخزون</h2>
+              <p className="text-sm text-muted-foreground mt-1">مراقبة مستويات المخزون</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Out of Stock */}
+        {outOfStockProducts.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-6 bg-red-500 rounded-full" />
+              <h3 className="font-bold text-red-600">نفد المخزون ({outOfStockProducts.length})</h3>
+            </div>
+            <div className="space-y-2">
+              {outOfStockProducts.map((p) => (
+                <div key={p.id} className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="font-semibold text-foreground">{p.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    المخزون: <span className="text-red-600 font-bold">0</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Low Stock */}
+        {lowStockProducts.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-6 bg-amber-500 rounded-full" />
+              <h3 className="font-bold text-amber-600">مخزون منخفض ({lowStockProducts.length})</h3>
+            </div>
+            <div className="space-y-2">
+              {lowStockProducts.map((p) => (
+                <div key={p.id} className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="font-semibold text-foreground">{p.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    المخزون: <span className="text-amber-600 font-bold">{p.stock}</span> (أقل من 5)
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {lowStockProducts.length === 0 && outOfStockProducts.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Package size={48} className="mx-auto mb-3 opacity-50" />
+            <p>جميع المنتجات متوفرة بمستويات مخزون جيدة</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Order Tracking Component ─────────────────────────────────────────────────
+export function OrderTracking({
+  orders,
+  onUpdateOrder,
+  onDeleteOrder,
+  onClose,
+}: OrderTrackingProps) {
+  const statusLabels = {
+    pending: "قيد الانتظار",
+    processing: "قيد المعالجة",
+    shipped: "تم الشحن",
+    completed: "مكتمل",
+  };
+
+  const statusColors = {
+    pending: "bg-yellow-100 text-yellow-700",
+    processing: "bg-blue-100 text-blue-700",
+    shipped: "bg-purple-100 text-purple-700",
+    completed: "bg-green-100 text-green-700",
+  };
+
+  const pendingOrders = useMemo(() => orders.filter((o) => o.status !== "completed"), [orders]);
+  const completedOrders = useMemo(() => orders.filter((o) => o.status === "completed"), [orders]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Truck className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-foreground">تتبع الطلبات</h2>
+              <p className="text-sm text-muted-foreground mt-1">إدارة حالة الطلبات</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Pending Orders */}
+        {pendingOrders.length > 0 && (
+          <div className="mb-8">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <Clock size={18} />
+              الطلبات النشطة ({pendingOrders.length})
+            </h3>
+            <div className="space-y-3">
+              {pendingOrders.map((order) => (
+                <div key={order.id} className="bg-secondary rounded-lg p-4 border border-border">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-foreground">{order.customerName}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(order.createdAt).toLocaleDateString("ar-SA")}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <select
+                        value={order.status}
+                        onChange={(e) => onUpdateOrder(order.id, e.target.value as Order["status"])}
+                        className="text-xs px-2 py-1 rounded-lg border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      >
+                        <option value="pending">قيد الانتظار</option>
+                        <option value="processing">قيد المعالجة</option>
+                        <option value="shipped">تم الشحن</option>
+                        <option value="completed">مكتمل</option>
+                      </select>
+                      <button
+                        onClick={() => onDeleteOrder(order.id)}
+                        className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-muted-foreground mb-2">المنتجات:</p>
+                    <div className="space-y-1">
+                      {order.items.map((item, idx) => (
+                        <p key={idx} className="text-sm text-foreground">
+                          • {item.productName} × {item.quantity} = {(item.price * item.quantity).toFixed(3)} ر.ع
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${statusColors[order.status]}`}>
+                      {statusLabels[order.status]}
+                    </span>
+                    <span className="text-lg font-black text-primary">{order.total.toFixed(3)} ر.ع</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Completed Orders */}
+        {completedOrders.length > 0 && (
+          <div>
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <Check size={18} className="text-green-600" />
+              الطلبات المكتملة ({completedOrders.length})
+            </h3>
+            <div className="space-y-2">
+              {completedOrders.slice(0, 5).map((order) => (
+                <div key={order.id} className="bg-green-50 rounded-lg p-3 border border-green-200 flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{order.customerName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString("ar-SA")}
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-green-600">{order.total.toFixed(3)} ر.ع</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {orders.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Truck size={48} className="mx-auto mb-3 opacity-50" />
+            <p>لا توجد طلبات حتى الآن</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Admin Management Component ────────────────────────────────────────────────
+export function AdminManagement({
+  admins,
+  currentAdminRole,
+  onAddAdmin,
+  onDeleteAdmin,
+  onClose,
+}: AdminManagementProps) {
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    role: "staff" as Admin["role"],
+  });
+
+  const roleLabels = {
+    owner: "مالك",
+    manager: "مدير",
+    staff: "موظف",
+  };
+
+  const handleAddAdmin = () => {
+    if (!formData.username.trim()) {
+      alert("يرجى إدخال اسم المستخدم");
+      return;
+    }
+
+    const newAdmin: Admin = {
+      id: Date.now().toString(),
+      username: formData.username.trim(),
+      role: formData.role,
+      permissions: {
+        viewProducts: true,
+        editProducts: formData.role !== "staff",
+        viewOrders: true,
+        editOrders: formData.role !== "staff",
+        viewStats: formData.role !== "staff",
+        viewAdmins: formData.role === "owner",
+        editAdmins: formData.role === "owner",
+      },
+      createdAt: Date.now(),
+    };
+
+    onAddAdmin(newAdmin);
+    setFormData({ username: "", role: "staff" });
+    setShowForm(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-purple-100 p-2 rounded-lg">
+              <Users className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-foreground">إدارة المشرفين</h2>
+              <p className="text-sm text-muted-foreground mt-1">تعيين الصلاحيات والأدوار</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Add Admin Form */}
+        {currentAdminRole === "owner" && !showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors mb-6"
+          >
+            + إضافة مشرف جديد
+          </button>
+        )}
+
+        {showForm && currentAdminRole === "owner" && (
+          <div className="bg-secondary rounded-lg p-4 mb-6 space-y-4">
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder="اسم المستخدم"
+              className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <select
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as Admin["role"] })}
+              className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="staff">موظف</option>
+              <option value="manager">مدير</option>
+            </select>
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddAdmin}
+                className="flex-1 bg-primary text-primary-foreground font-bold py-2 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                إضافة
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                className="flex-1 bg-secondary text-foreground font-bold py-2 rounded-lg hover:bg-secondary/80 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Admins List */}
+        <div className="space-y-3">
+          {admins.map((admin) => (
+            <div key={admin.id} className="bg-secondary rounded-lg p-4 border border-border flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-foreground">{admin.username}</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {roleLabels[admin.role]} • {new Date(admin.createdAt).toLocaleDateString("ar-SA")}
+                </p>
+              </div>
+              {currentAdminRole === "owner" && admin.role !== "owner" && (
+                <button
+                  onClick={() => onDeleteAdmin(admin.id)}
+                  className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {admins.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Users size={48} className="mx-auto mb-3 opacity-50" />
+            <p>لا توجد مشرفين إضافيين</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
