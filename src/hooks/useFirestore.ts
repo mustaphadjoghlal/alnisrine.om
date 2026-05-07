@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, doc, updateDoc, onSnapshot } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "../firebase";  // المسار الصحيح للخروج من مجلد hooks إلى src
+import { collection, doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { Product, SiteSettings } from "../types";
 
 // جلب المنتجات
@@ -52,6 +52,7 @@ export function useSiteSettings() {
   return { settings, loading };
 }
 
+// دالة لتحديث منتج
 export async function updateProduct(productId: string, data: Partial<Product>) {
   const productRef = doc(db, "products", productId);
   await updateDoc(productRef, data);
