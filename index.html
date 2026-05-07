@@ -3,60 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>موقع محل النسرين - متصل بـ Firebase</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; }
-      #root { height: 100%; }
-      #firebase-status {
-        background: #4caf50;
-        color: white;
-        padding: 12px;
-        text-align: center;
-        font-family: Arial, sans-serif;
-        font-weight: bold;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-      }
-    </style>
-
-    <!-- Firebase SDK - الاتصال مباشرة -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyC7B5Xm6uY07VZiZXTQ4ztAqpSE3n_8A3E",
-        authDomain: "alnisrine-e531d.firebaseapp.com",
-        projectId: "alnisrine-e531d",
-        storageBucket: "alnisrine-e531d.firebasestorage.app",
-        messagingSenderId: "81259688625",
-        appId: "1:81259688625:web:3c8b66d647d0de7658e890",
-        measurementId: "G-PJQZKV54DP"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-
-      // تحديث شريط الحالة
-      const statusDiv = document.getElementById("firebase-status");
-      if (statusDiv) {
-        statusDiv.innerHTML = "✅ Firebase متصل بنجاح - جاهز للعمل";
-        statusDiv.style.background = "#2e7d32";
-      }
-
-      console.log("Firebase initialized", app.name);
-      window.db = db;
-      window.auth = auth;
-    </script>
+    <title>النسرين</title>
   </head>
   <body>
-    <div id="firebase-status">🔥 جاري الاتصال بـ Firebase...</div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
