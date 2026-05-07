@@ -18,7 +18,6 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-// دالة رفع الصور إلى Firebase Storage
 export async function uploadProductImage(file: File, productName: string): Promise<string> {
   const extension = file.name.split('.').pop();
   const fileName = `${productName.replace(/\s/g, '_')}_${Date.now()}.${extension}`;
