@@ -1,18 +1,61 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { db } from "./firebase";  // استيراد من ملف الإعداد الذي أرسلته
+import { collection, getDocs, doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { Product, SiteSettings } from "../types";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC7B5Xm6uY07VZiZXTQ4ztAqpSE3n_8A3E",
-  authDomain: "alnisrine-e531d.firebaseapp.com",
-  projectId: "alnisrine-e531d",
-  storageBucket: "alnisrine-e531d.firebasestorage.app",
-  messagingSenderId: "81259688625",
-  appId: "1:81259688625:web:7200c310c4b4957d58e890",
-  measurementId: "G-8098ZTHSCV"
-};
+// جلب المنتجات
+export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export default app;
+  useEffect(() => {
+    const productsRef = collection(db, "products");
+    const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(data);
+      setLoading(false);
+    }, (error) => {
+      console.error("خطأ في جلب المنتجات:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return { products, loading };
+}
+
+// جلب إعدادات الموقع
+export function useSiteSettings() {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const settingsRef = collection(db, "settings");
+    const unsubscribe = onSnapshot(settingsRef, (snapshot) => {
+      if (!snapshot.empty) {
+        // نفترض وجود وثيقة واحدة فقط في مجموعة settings
+        const docSnap = snapshot.docs[0];
+        setSettings({ id: docSnap.id, ...docSnap.data() } as SiteSettings);
+      } else {
+        // إذا لم توجد إعدادات، يمكنك إنشاء وثيقة افتراضية
+        console.warn("لا توجد إعدادات في Firestore");
+        setSettings(null);
+      }
+      setLoading(false);
+    }, (error) => {
+      console.error("خطأ في جلب الإعدادات:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return { settings, loading };
+}
+
+// دالة لتحديث منتج (يمكن إضافتها عند الحاجة)
+export async function updateProduct(productId: string, data: Partial<Product>) {
+  const productRef = doc(db, "products", productId);
+  await updateDoc(productRef, data);
+}
