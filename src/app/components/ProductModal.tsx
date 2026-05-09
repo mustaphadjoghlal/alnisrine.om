@@ -1,18 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, ShoppingCart, Plus, Minus, MessageCircle } from "lucide-react";
 import type { Product, ColorOption } from "../types";
-import { CAT_LABELS, SITE_INFO_KEY, INIT_SITE_INFO } from "../constants";
+import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
 import { StarRating } from "./StarRating";
 import { WhatsAppSvg } from "./WhatsAppSvg";
-
-function getSiteInfo() {
-  try {
-    const saved = localStorage.getItem(SITE_INFO_KEY);
-    return saved ? JSON.parse(saved) : INIT_SITE_INFO;
-  } catch {
-    return INIT_SITE_INFO;
-  }
-}
+import { subscribeToSiteInfo } from "../../lib/firestore";
 
 export function ProductModal({
   product,
@@ -23,8 +15,14 @@ export function ProductModal({
   onClose: () => void;
   onAdd: (p: Product) => void;
 }) {
-  const siteInfo = getSiteInfo();
-  const whatsapp = siteInfo.whatsappNumber || INIT_SITE_INFO.whatsappNumber;
+  const [whatsapp, setWhatsapp] = useState(INIT_SITE_INFO.whatsappNumber);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteInfo((info) => {
+      setWhatsapp(info.whatsappNumber || INIT_SITE_INFO.whatsappNumber);
+    });
+    return unsub;
+  }, []);
 
   const [qty, setQty] = useState(1);
   const [selectedSizeIdx, setSelectedSizeIdx] = useState(0);
@@ -64,7 +62,6 @@ export function ProductModal({
         dir="rtl"
       >
         <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* Image */}
           <div className="relative aspect-square bg-secondary">
             <img
               src={product.image}
@@ -80,7 +77,6 @@ export function ProductModal({
             )}
           </div>
 
-          {/* Details */}
           <div className="p-6 flex flex-col gap-4">
             <div className="flex items-start justify-between">
               <div>
@@ -91,10 +87,7 @@ export function ProductModal({
                   {product.name}
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                className="text-muted-foreground hover:text-foreground p-1"
-              >
+              <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
                 <X size={20} />
               </button>
             </div>
@@ -105,7 +98,6 @@ export function ProductModal({
               {product.description}
             </p>
 
-            {/* Size Dropdown */}
             {hasSizes && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">الحجم</p>
@@ -123,7 +115,6 @@ export function ProductModal({
               </div>
             )}
 
-            {/* Colors */}
             {product.colors.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">الألوان المتاحة</p>
@@ -186,7 +177,6 @@ export function ProductModal({
                   </div>
                 )}
 
-                {/* Contact for other colors */}
                 {product.showContactForOtherColors && (
                   <a
                     href={`https://wa.me/${whatsapp}?text=${colorWaText}`}
@@ -201,20 +191,13 @@ export function ProductModal({
               </div>
             )}
 
-            {/* Quantity & Price */}
             <div className="flex items-center gap-3">
               <div className="flex items-center border border-border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setQty(Math.max(1, qty - 1))}
-                  className="px-3 py-2 hover:bg-secondary transition-colors"
-                >
+                <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3 py-2 hover:bg-secondary transition-colors">
                   <Minus size={14} />
                 </button>
                 <span className="px-4 py-2 font-bold text-sm">{qty}</span>
-                <button
-                  onClick={() => setQty(qty + 1)}
-                  className="px-3 py-2 hover:bg-secondary transition-colors"
-                >
+                <button onClick={() => setQty(qty + 1)} className="px-3 py-2 hover:bg-secondary transition-colors">
                   <Plus size={14} />
                 </button>
               </div>
@@ -227,10 +210,7 @@ export function ProductModal({
             </div>
 
             <button
-              onClick={() => {
-                for (let i = 0; i < qty; i++) onAdd(product);
-                onClose();
-              }}
+              onClick={() => { for (let i = 0; i < qty; i++) onAdd(product); onClose(); }}
               disabled={!product.inStock}
               className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-xl hover:bg-primary/90 active:scale-98 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >

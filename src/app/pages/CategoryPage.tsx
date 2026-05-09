@@ -4,7 +4,8 @@ import { Search, Filter } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
 import type { Product, Category } from "../types";
-import { INIT_PRODUCTS, CAT_LABELS, CAT_DESC, CAT_IMAGES } from "../constants";
+import { CAT_LABELS, CAT_DESC, CAT_IMAGES } from "../constants";
+import { subscribeToProducts } from "../../lib/firestore";
 
 export function CategoryPage() {
   const { category } = useParams<{ category: Category }>();
@@ -18,8 +19,8 @@ export function CategoryPage() {
   const [showInStock, setShowInStock] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("products");
-    setProducts(saved ? JSON.parse(saved) : INIT_PRODUCTS);
+    const unsub = subscribeToProducts(setProducts);
+    return unsub;
   }, []);
 
   const filtered = useMemo(() => {

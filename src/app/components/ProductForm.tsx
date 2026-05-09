@@ -33,11 +33,9 @@ export function ProductForm({
     initial ? { ...initial } : { ...EMPTY_FORM }
   );
 
-  // Size entry state
   const [sizeLabel, setSizeLabel] = useState("");
   const [sizePrice, setSizePrice] = useState("");
 
-  // Color entry state
   const [colorHex, setColorHex] = useState("#FFFFFF");
   const [colorName, setColorName] = useState("");
   const [colorPrice, setColorPrice] = useState("");
@@ -111,7 +109,6 @@ export function ProductForm({
         </div>
 
         <div className="space-y-5">
-          {/* Basic Info */}
           <div>
             <label className="text-sm font-semibold text-foreground mb-1 block">اسم المنتج *</label>
             <input
@@ -181,11 +178,8 @@ export function ProductForm({
             </div>
           </div>
 
-          {/* Sizes */}
           <div className="border border-border rounded-xl p-4">
-            <label className="text-sm font-bold text-foreground mb-3 block">
-              الأحجام والأسعار
-            </label>
+            <label className="text-sm font-bold text-foreground mb-3 block">الأحجام والأسعار</label>
             <div className="flex gap-2 mb-3">
               <input
                 value={sizeLabel}
@@ -229,11 +223,8 @@ export function ProductForm({
             )}
           </div>
 
-          {/* Colors */}
           <div className="border border-border rounded-xl p-4">
-            <label className="text-sm font-bold text-foreground mb-3 block">
-              الألوان والأسعار
-            </label>
+            <label className="text-sm font-bold text-foreground mb-3 block">الألوان والأسعار</label>
 
             <div className="mb-3">
               <label className="text-xs font-semibold text-muted-foreground mb-1 block">
@@ -336,7 +327,6 @@ export function ProductForm({
             </div>
           </div>
 
-          {/* Image */}
           <div>
             <label className="text-sm font-semibold text-foreground mb-1 block">رابط الصورة *</label>
             <input
@@ -355,7 +345,6 @@ export function ProductForm({
             )}
           </div>
 
-          {/* Toggles */}
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <div

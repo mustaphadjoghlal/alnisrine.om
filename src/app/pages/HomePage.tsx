@@ -4,7 +4,8 @@ import { ChevronRight, Star, Package, Shield, TrendingUp } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
 import type { Product } from "../types";
-import { INIT_PRODUCTS, CAT_LABELS, CAT_IMAGES } from "../constants";
+import { CAT_LABELS, CAT_IMAGES } from "../constants";
+import { subscribeToProducts } from "../../lib/firestore";
 
 export function HomePage() {
   const { addToCart } = useOutletContext<{
@@ -14,8 +15,8 @@ export function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("products");
-    setProducts(saved ? JSON.parse(saved) : INIT_PRODUCTS);
+    const unsub = subscribeToProducts(setProducts);
+    return unsub;
   }, []);
 
   const featuredProducts = products.filter((p) => p.featured).slice(0, 6);
