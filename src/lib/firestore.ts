@@ -4,28 +4,15 @@ import {
   setDoc,
   deleteDoc,
   onSnapshot,
-  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Product, SiteInfo } from "../app/types";
-import { INIT_PRODUCTS, INIT_SITE_INFO } from "../app/constants";
+import { INIT_SITE_INFO } from "../app/constants";
 
 const PRODUCTS_COL = "products";
 
-let productsSeeded = false;
-
 export function subscribeToProducts(callback: (products: Product[]) => void) {
-  return onSnapshot(collection(db, PRODUCTS_COL), async (snap) => {
-    if (snap.empty && !productsSeeded) {
-      productsSeeded = true;
-      const batch = writeBatch(db);
-      for (const p of INIT_PRODUCTS) {
-        batch.set(doc(db, PRODUCTS_COL, p.id), p);
-      }
-      await batch.commit();
-      callback(INIT_PRODUCTS);
-      return;
-    }
+  return onSnapshot(collection(db, PRODUCTS_COL), (snap) => {
     const products = snap.docs.map((d) => d.data() as Product);
     callback(products);
   });
