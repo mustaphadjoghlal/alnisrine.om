@@ -1,6 +1,29 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type Category = "interior" | "exterior" | "materials";
 
+export interface SizeOption {
+  label: string;
+  price: number;
+}
+
+export interface ColorOption {
+  hex: string;
+  name?: string;
+  price?: number;
+  isPopular?: boolean;
+}
+
+export interface SiteInfo {
+  storeName: string;
+  mission: string;
+  about: string;
+  whatsappNumber: string;
+  phone: string;
+  email: string;
+  address: string;
+  workingHours: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -9,13 +32,15 @@ export interface Product {
   image: string;
   category: Category;
   subcategory: string;
-  colors: string[];
+  sizes: SizeOption[];
+  basicColorPrice: number;
+  colors: ColorOption[];
+  showContactForOtherColors: boolean;
   inStock: boolean;
   featured: boolean;
   rating: number;
   reviews: number;
   unit: string;
-  size: string;
 }
 
 export interface CartItem {
@@ -73,4 +98,3 @@ export interface InventoryAlert {
   threshold: number;
   lastAlertDate: string;
 }
-

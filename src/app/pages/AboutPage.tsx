@@ -1,7 +1,20 @@
 import { Star, Package, Shield, Users, TrendingUp, Award } from "lucide-react";
 import logo from "../../imports/photo-1700901555562-952f0008a11f.jpeg_-_Copy.png";
+import { INIT_SITE_INFO, SITE_INFO_KEY } from "../constants";
+import type { SiteInfo } from "../types";
+
+function getSiteInfo(): SiteInfo {
+  try {
+    const saved = localStorage.getItem(SITE_INFO_KEY);
+    return saved ? JSON.parse(saved) : INIT_SITE_INFO;
+  } catch {
+    return INIT_SITE_INFO;
+  }
+}
 
 export function AboutPage() {
+  const info = getSiteInfo();
+
   return (
     <div className="min-h-screen">
       <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white py-16 px-4">
@@ -24,24 +37,12 @@ export function AboutPage() {
           </div>
           <div>
             <h2 className="text-3xl font-black text-foreground mb-6">
-              محل النسرين للأصباغ ومواد البناء
+              {info.storeName}
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                منذ تأسيسنا في سلطنة عُمان، أصبحنا الوجهة المفضلة لآلاف العملاء
-                الباحثين عن أفضل أصباغ جوتن ومواد البناء عالية الجودة. نؤمن بأن
-                منزلك يستحق الأفضل، لذلك نوفر لك منتجات أصلية 100% بأسعار تنافسية.
-              </p>
-              <p>
-                نفخر بتقديم مجموعة واسعة من أصباغ جوتن الداخلية والخارجية،
-                بالإضافة إلى مواد البناء والأدوات الاحترافية. فريقنا المتخصص
-                جاهز لمساعدتك في اختيار المنتجات المناسبة لمشروعك.
-              </p>
-              <p>
-                رؤيتنا هي أن نكون المرجع الأول في سلطنة عُمان لكل ما يتعلق
-                بالأصباغ ومواد البناء، من خلال تقديم جودة عالمية وخدمة عملاء
-                استثنائية.
-              </p>
+              {info.about.split("\n").filter(Boolean).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
             </div>
           </div>
         </div>
@@ -74,6 +75,14 @@ export function AboutPage() {
               سنوات من الخبرة في خدمة عملائنا الكرام
             </p>
           </div>
+        </div>
+
+        {/* Mission */}
+        <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white rounded-3xl p-12 text-center mb-12">
+          <h2 className="text-3xl font-black mb-4">رسالتنا</h2>
+          <p className="text-blue-100 max-w-2xl mx-auto leading-relaxed">
+            {info.mission}
+          </p>
         </div>
 
         <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white rounded-3xl p-12 text-center">

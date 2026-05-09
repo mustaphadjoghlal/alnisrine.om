@@ -56,7 +56,7 @@ export function CartDrawer({
                       {item.product.name}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      {item.product.size}
+                      {item.product.sizes[0]?.label ?? ""}
                     </p>
                     <p className="text-sm font-black text-primary mt-1">
                       {(item.product.price * item.quantity).toFixed(3)} ر.ع

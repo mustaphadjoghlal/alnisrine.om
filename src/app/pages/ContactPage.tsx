@@ -1,8 +1,20 @@
 import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 import { WhatsAppSvg } from "../components/WhatsAppSvg";
-import { WHATSAPP_NUMBER } from "../constants";
+import { INIT_SITE_INFO, SITE_INFO_KEY } from "../constants";
+import type { SiteInfo } from "../types";
+
+function getSiteInfo(): SiteInfo {
+  try {
+    const saved = localStorage.getItem(SITE_INFO_KEY);
+    return saved ? JSON.parse(saved) : INIT_SITE_INFO;
+  } catch {
+    return INIT_SITE_INFO;
+  }
+}
 
 export function ContactPage() {
+  const info = getSiteInfo();
+
   return (
     <div className="min-h-screen">
       <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white py-16 px-4">
@@ -33,13 +45,13 @@ export function ContactPage() {
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">الهاتف</h3>
                   <a
-                    href="tel:+96891234567"
+                    href={`tel:${info.phone}`}
                     className="text-blue-600 hover:underline"
                   >
-                    +968 9123 4567
+                    {info.phone}
                   </a>
                   <p className="text-sm text-muted-foreground mt-1">
-                    من السبت إلى الخميس، 8 صباحاً - 8 مساءً
+                    {info.workingHours}
                   </p>
                 </div>
               </div>
@@ -51,10 +63,10 @@ export function ContactPage() {
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">البريد الإلكتروني</h3>
                   <a
-                    href="mailto:info@nasreen.om"
+                    href={`mailto:${info.email}`}
                     className="text-blue-600 hover:underline"
                   >
-                    info@nasreen.om
+                    {info.email}
                   </a>
                   <p className="text-sm text-muted-foreground mt-1">
                     سنرد على رسالتك في أقرب وقت ممكن
@@ -68,7 +80,7 @@ export function ContactPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">العنوان</h3>
-                  <p className="text-foreground">مسقط، سلطنة عُمان</p>
+                  <p className="text-foreground">{info.address}</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     متاح التوصيل لجميع مناطق السلطنة
                   </p>
@@ -81,18 +93,13 @@ export function ContactPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">ساعات العمل</h3>
-                  <p className="text-foreground">
-                    السبت - الخميس: 8:00 ص - 8:00 م
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    مغلق يوم الجمعة
-                  </p>
+                  <p className="text-foreground">{info.workingHours}</p>
                 </div>
               </div>
             </div>
 
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("مرحباً، أرغب في الاستفسار عن منتجاتكم")}`}
+              href={`https://wa.me/${info.whatsappNumber}?text=${encodeURIComponent("مرحباً، أرغب في الاستفسار عن منتجاتكم")}`}
               target="_blank"
               rel="noreferrer"
               className="mt-8 w-full bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
@@ -108,9 +115,7 @@ export function ContactPage() {
             </h2>
             <form className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-2">
-                  الاسم الكامل
-                </label>
+                <label className="block text-sm font-semibold mb-2">الاسم الكامل</label>
                 <input
                   type="text"
                   className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -118,9 +123,7 @@ export function ContactPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">
-                  رقم الهاتف
-                </label>
+                <label className="block text-sm font-semibold mb-2">رقم الهاتف</label>
                 <input
                   type="tel"
                   className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -128,9 +131,7 @@ export function ContactPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">
-                  البريد الإلكتروني
-                </label>
+                <label className="block text-sm font-semibold mb-2">البريد الإلكتروني</label>
                 <input
                   type="email"
                   className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -138,9 +139,7 @@ export function ContactPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">
-                  الرسالة
-                </label>
+                <label className="block text-sm font-semibold mb-2">الرسالة</label>
                 <textarea
                   rows={5}
                   className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"

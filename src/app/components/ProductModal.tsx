@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { X, ShoppingCart, Plus, Minus } from "lucide-react";
-import type { Product } from "../types";
-import { CAT_LABELS, WHATSAPP_NUMBER } from "../constants";
+import { X, ShoppingCart, Plus, Minus, MessageCircle } from "lucide-react";
+import type { Product, ColorOption } from "../types";
+import { CAT_LABELS, SITE_INFO_KEY, INIT_SITE_INFO } from "../constants";
 import { StarRating } from "./StarRating";
 import { WhatsAppSvg } from "./WhatsAppSvg";
+
+function getSiteInfo() {
+  try {
+    const saved = localStorage.getItem(SITE_INFO_KEY);
+    return saved ? JSON.parse(saved) : INIT_SITE_INFO;
+  } catch {
+    return INIT_SITE_INFO;
+  }
+}
 
 export function ProductModal({
   product,
@@ -14,8 +23,35 @@ export function ProductModal({
   onClose: () => void;
   onAdd: (p: Product) => void;
 }) {
+  const siteInfo = getSiteInfo();
+  const whatsapp = siteInfo.whatsappNumber || INIT_SITE_INFO.whatsappNumber;
+
   const [qty, setQty] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] || "");
+  const [selectedSizeIdx, setSelectedSizeIdx] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(
+    product.colors.length > 0 ? product.colors[0] : null
+  );
+
+  const hasSizes = product.sizes.length > 0;
+  const selectedSize = hasSizes ? product.sizes[selectedSizeIdx] : null;
+  const displayPrice = selectedSize ? selectedSize.price : product.price;
+
+  const colorPrice = selectedColor?.price != null
+    ? selectedColor.price
+    : product.basicColorPrice;
+
+  const popularColors = product.colors.filter((c) => c.isPopular);
+  const otherColors = product.colors.filter((c) => !c.isPopular);
+
+  const waText = encodeURIComponent(
+    `مرحباً، أرغب في الاستفسار عن: ${product.name}` +
+    (selectedSize ? ` - ${selectedSize.label}` : "") +
+    (selectedColor ? ` - ${selectedColor.name || selectedColor.hex}` : "")
+  );
+
+  const colorWaText = encodeURIComponent(
+    `مرحباً، أرغب في معرفة سعر لون خاص لمنتج: ${product.name}`
+  );
 
   return (
     <div
@@ -25,8 +61,10 @@ export function ProductModal({
       <div
         className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        dir="rtl"
       >
         <div className="grid grid-cols-1 md:grid-cols-2">
+          {/* Image */}
           <div className="relative aspect-square bg-secondary">
             <img
               src={product.image}
@@ -41,6 +79,8 @@ export function ProductModal({
               </div>
             )}
           </div>
+
+          {/* Details */}
           <div className="p-6 flex flex-col gap-4">
             <div className="flex items-start justify-between">
               <div>
@@ -58,47 +98,110 @@ export function ProductModal({
                 <X size={20} />
               </button>
             </div>
+
             <StarRating rating={product.rating} reviews={product.reviews} />
+
             <p className="text-sm text-muted-foreground leading-relaxed">
               {product.description}
             </p>
-            <div className="flex gap-4 text-sm">
-              <div className="bg-secondary rounded-lg px-3 py-2 text-center">
-                <div className="font-bold text-foreground">{product.size}</div>
-                <div className="text-xs text-muted-foreground">الحجم</div>
-              </div>
-              <div className="bg-secondary rounded-lg px-3 py-2 text-center">
-                <div className="font-bold text-foreground">{product.unit}</div>
-                <div className="text-xs text-muted-foreground">الوحدة</div>
-              </div>
-              <div
-                className={`rounded-lg px-3 py-2 text-center ${product.inStock ? "bg-green-50" : "bg-red-50"}`}
-              >
-                <div
-                  className={`font-bold text-sm ${product.inStock ? "text-green-700" : "text-red-600"}`}
-                >
-                  {product.inStock ? "متوفر" : "غير متوفر"}
-                </div>
-                <div className="text-xs text-muted-foreground">المخزون</div>
-              </div>
-            </div>
-            {product.colors.length > 0 && (
+
+            {/* Size Dropdown */}
+            {hasSizes && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-2">
-                  الألوان المتاحة
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  {product.colors.map((c, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedColor(c)}
-                      className={`w-7 h-7 rounded-full border-2 transition-all ${selectedColor === c ? "border-primary scale-125" : "border-border hover:scale-110"}`}
-                      style={{ backgroundColor: c }}
-                    />
+                <p className="text-xs font-semibold text-muted-foreground mb-2">الحجم</p>
+                <select
+                  value={selectedSizeIdx}
+                  onChange={(e) => setSelectedSizeIdx(Number(e.target.value))}
+                  className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  {product.sizes.map((s, i) => (
+                    <option key={i} value={i}>
+                      {s.label} — {s.price.toFixed(3)} ر.ع
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
             )}
+
+            {/* Colors */}
+            {product.colors.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">الألوان المتاحة</p>
+
+                {popularColors.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-[10px] text-amber-600 font-bold mb-1">الأكثر طلباً</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {popularColors.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedColor(c)}
+                          title={c.name || c.hex}
+                          className={`relative group w-8 h-8 rounded-full border-2 transition-all ${selectedColor?.hex === c.hex ? "border-primary scale-125" : "border-border hover:scale-110"}`}
+                          style={{ backgroundColor: c.hex }}
+                        >
+                          {c.price != null && (
+                            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-blue-700 whitespace-nowrap hidden group-hover:block bg-white px-1 rounded shadow">
+                              {c.price.toFixed(3)}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {otherColors.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-[10px] text-muted-foreground font-semibold mb-1">ألوان أخرى</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {otherColors.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedColor(c)}
+                          title={c.name || c.hex}
+                          className={`w-7 h-7 rounded-full border-2 transition-all ${selectedColor?.hex === c.hex ? "border-primary scale-125" : "border-border hover:scale-110"}`}
+                          style={{ backgroundColor: c.hex }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedColor && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: selectedColor.hex }} />
+                    <span className="text-xs text-muted-foreground">
+                      {selectedColor.name || selectedColor.hex}
+                    </span>
+                    {selectedColor.price != null ? (
+                      <span className="text-xs font-bold text-blue-700">
+                        {selectedColor.price.toFixed(3)} ر.ع
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        ({colorPrice.toFixed(3)} ر.ع)
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Contact for other colors */}
+                {product.showContactForOtherColors && (
+                  <a
+                    href={`https://wa.me/${whatsapp}?text=${colorWaText}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors w-fit"
+                  >
+                    <MessageCircle size={14} />
+                    لونك غير موجود؟ تواصل معنا لمعرفة السعر
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Quantity & Price */}
             <div className="flex items-center gap-3">
               <div className="flex items-center border border-border rounded-lg overflow-hidden">
                 <button
@@ -117,11 +220,12 @@ export function ProductModal({
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-black text-primary">
-                  {(product.price * qty).toFixed(3)}
+                  {(displayPrice * qty).toFixed(3)}
                 </span>
                 <span className="text-sm text-muted-foreground">ر.ع</span>
               </div>
             </div>
+
             <button
               onClick={() => {
                 for (let i = 0; i < qty; i++) onAdd(product);
@@ -133,8 +237,9 @@ export function ProductModal({
               <ShoppingCart size={18} />
               أضف إلى السلة
             </button>
+
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`مرحباً، أرغب في الاستفسار عن: ${product.name} - ${product.size}`)}`}
+              href={`https://wa.me/${whatsapp}?text=${waText}`}
               target="_blank"
               rel="noreferrer"
               className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2"

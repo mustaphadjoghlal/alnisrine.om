@@ -55,7 +55,7 @@ export function Layout() {
     const items = cart
       .map(
         (i) =>
-          `• ${i.product.name} (${i.product.size}) - الكمية: ${i.quantity} - ${(i.product.price * i.quantity).toFixed(3)} ر.ع`
+          `• ${i.product.name} (${i.product.sizes[0]?.label ?? ""}) - الكمية: ${i.quantity} - ${(i.product.price * i.quantity).toFixed(3)} ر.ع`
       )
       .join("\n");
     const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);

@@ -1,4 +1,4 @@
-import type { Category, Product } from "../types";
+import type { Category, Product, SiteInfo } from "../types";
 
 // ─── Category Constants ───────────────────────────────────────────────────────
 export const CAT_LABELS: Record<Category, string> = {
@@ -25,6 +25,21 @@ export const CAT_IMAGES: Record<Category, string> = {
 export const ADMIN_PASS = "nasreen2024";
 export const WHATSAPP_NUMBER = "96891234567";
 
+export const SITE_INFO_KEY = "siteInfo";
+
+export const INIT_SITE_INFO: SiteInfo = {
+  storeName: "محل النسرين للأصباغ ومواد البناء",
+  mission:
+    "رؤيتنا هي أن نكون المرجع الأول في سلطنة عُمان لكل ما يتعلق بالأصباغ ومواد البناء، من خلال تقديم جودة عالمية وخدمة عملاء استثنائية.",
+  about:
+    "منذ تأسيسنا في سلطنة عُمان، أصبحنا الوجهة المفضلة لآلاف العملاء الباحثين عن أفضل أصباغ جوتن ومواد البناء عالية الجودة. نؤمن بأن منزلك يستحق الأفضل، لذلك نوفر لك منتجات أصلية 100% بأسعار تنافسية.",
+  whatsappNumber: "96891234567",
+  phone: "+968 9123 4567",
+  email: "info@nasreen.om",
+  address: "مسقط، سلطنة عُمان",
+  workingHours: "السبت - الخميس: 8:00 ص - 8:00 م",
+};
+
 // ─── Initial Products ─────────────────────────────────────────────────────────
 export const INIT_PRODUCTS: Product[] = [
   {
@@ -37,13 +52,25 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop&auto=format",
     category: "interior",
     subcategory: "دهان فاخر",
-    colors: ["#FFFFFF", "#FFF8E7", "#E8D5C4", "#B8C4D4", "#C4D4B8"],
+    sizes: [
+      { label: "1 لتر", price: 6.5 },
+      { label: "4 لتر", price: 18.0 },
+      { label: "18 لتر", price: 45.5 },
+    ],
+    basicColorPrice: 45.5,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#FFF8E7", name: "كريمي", isPopular: true, price: 47.0 },
+      { hex: "#E8D5C4", name: "بيج", isPopular: true, price: 48.0 },
+      { hex: "#B8C4D4", name: "رمادي فاتح", isPopular: false, price: 50.0 },
+      { hex: "#C4D4B8", name: "أخضر فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: true,
     rating: 4.9,
     reviews: 187,
     unit: "علبة",
-    size: "18 لتر",
   },
   {
     id: "2",
@@ -55,13 +82,24 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1580465446361-8aae5321522b?w=600&h=600&fit=crop&auto=format",
     category: "interior",
     subcategory: "قابل للغسيل",
-    colors: ["#FFFFFF", "#F5F5F5", "#E0E8F0", "#F0E8E0", "#E8F0E0"],
+    sizes: [
+      { label: "4 لتر", price: 28.0 },
+      { label: "18 لتر", price: 95.0 },
+    ],
+    basicColorPrice: 28.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#F5F5F5", name: "أبيض مكسور", isPopular: true, price: 29.5 },
+      { hex: "#E0E8F0", name: "أزرق فاتح", isPopular: true, price: 31.0 },
+      { hex: "#F0E8E0", name: "وردي فاتح", isPopular: false },
+      { hex: "#E8F0E0", name: "أخضر فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: true,
     rating: 4.7,
     reviews: 143,
     unit: "علبة",
-    size: "4 لتر",
   },
   {
     id: "3",
@@ -73,13 +111,22 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1503455637927-730bce8583c0?w=600&h=600&fit=crop&auto=format",
     category: "interior",
     subcategory: "اقتصادي",
-    colors: ["#FFFFFF", "#FFFAF0", "#F5F0E8"],
+    sizes: [
+      { label: "4 لتر", price: 22.0 },
+      { label: "18 لتر", price: 75.0 },
+    ],
+    basicColorPrice: 22.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#FFFAF0", name: "أبيض دافئ", isPopular: false },
+      { hex: "#F5F0E8", name: "كريمي فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: false,
     rating: 4.5,
     reviews: 89,
     unit: "علبة",
-    size: "18 لتر",
   },
   {
     id: "4",
@@ -91,13 +138,24 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1562184552-997c461abbe8?w=600&h=600&fit=crop&auto=format",
     category: "interior",
     subcategory: "زخرفي",
-    colors: ["#D4A5A5", "#A5C4D4", "#A5D4B8", "#D4C4A5", "#C4A5D4"],
+    sizes: [
+      { label: "1 لتر", price: 12.5 },
+      { label: "4 لتر", price: 38.0 },
+    ],
+    basicColorPrice: 12.5,
+    colors: [
+      { hex: "#D4A5A5", name: "وردي", isPopular: true, price: 14.0 },
+      { hex: "#A5C4D4", name: "أزرق", isPopular: true, price: 14.0 },
+      { hex: "#A5D4B8", name: "أخضر", isPopular: true, price: 14.0 },
+      { hex: "#D4C4A5", name: "بيج ذهبي", isPopular: false },
+      { hex: "#C4A5D4", name: "بنفسجي", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: false,
     rating: 4.6,
     reviews: 62,
     unit: "علبة",
-    size: "1 لتر",
   },
   {
     id: "5",
@@ -109,13 +167,23 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&h=600&fit=crop&auto=format",
     category: "exterior",
     subcategory: "دهان فاخر",
-    colors: ["#FFFFFF", "#F5F5F0", "#E8E0D8", "#D8E0E8"],
+    sizes: [
+      { label: "4 لتر", price: 55.0 },
+      { label: "18 لتر", price: 185.0 },
+    ],
+    basicColorPrice: 55.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#F5F5F0", name: "أبيض ناصع", isPopular: true, price: 57.0 },
+      { hex: "#E8E0D8", name: "رملي", isPopular: true, price: 60.0 },
+      { hex: "#D8E0E8", name: "رمادي فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: true,
     rating: 4.9,
     reviews: 234,
     unit: "علبة",
-    size: "18 لتر",
   },
   {
     id: "6",
@@ -127,13 +195,22 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1543373014-cfe4f4bc1cdf?w=600&h=600&fit=crop&auto=format",
     category: "exterior",
     subcategory: "مقاوم للطحالب",
-    colors: ["#FFFFFF", "#E8E8E0", "#D4DCE4"],
+    sizes: [
+      { label: "4 لتر", price: 42.0 },
+      { label: "18 لتر", price: 155.0 },
+    ],
+    basicColorPrice: 42.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#E8E8E0", name: "أبيض مائل", isPopular: false },
+      { hex: "#D4DCE4", name: "رمادي", isPopular: false },
+    ],
+    showContactForOtherColors: true,
     inStock: true,
     featured: true,
     rating: 4.8,
     reviews: 178,
     unit: "علبة",
-    size: "18 لتر",
   },
   {
     id: "7",
@@ -145,13 +222,21 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=600&fit=crop&auto=format",
     category: "exterior",
     subcategory: "عازل مائي",
-    colors: ["#FFFFFF", "#E0E8E0"],
+    sizes: [
+      { label: "4 لتر", price: 32.0 },
+      { label: "18 لتر", price: 115.0 },
+    ],
+    basicColorPrice: 32.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#E0E8E0", name: "أخضر فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: false,
     inStock: true,
     featured: false,
     rating: 4.7,
     reviews: 95,
     unit: "علبة",
-    size: "4 لتر",
   },
   {
     id: "8",
@@ -163,13 +248,21 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop&auto=format",
     category: "exterior",
     subcategory: "دهان الأسطح",
-    colors: ["#FFFFFF", "#C8C8C0"],
+    sizes: [
+      { label: "5 لتر", price: 28.0 },
+      { label: "18 لتر", price: 85.0 },
+    ],
+    basicColorPrice: 28.0,
+    colors: [
+      { hex: "#FFFFFF", name: "أبيض", isPopular: true },
+      { hex: "#C8C8C0", name: "رمادي فاتح", isPopular: false },
+    ],
+    showContactForOtherColors: false,
     inStock: false,
     featured: false,
     rating: 4.5,
     reviews: 67,
     unit: "علبة",
-    size: "5 لتر",
   },
   {
     id: "9",
@@ -181,13 +274,18 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=600&fit=crop&auto=format",
     category: "materials",
     subcategory: "معاجين",
+    sizes: [
+      { label: "5 كغ", price: 8.5 },
+      { label: "20 كغ", price: 28.0 },
+    ],
+    basicColorPrice: 8.5,
     colors: [],
+    showContactForOtherColors: false,
     inStock: true,
     featured: false,
     rating: 4.6,
     reviews: 112,
     unit: "علبة",
-    size: "5 كغ",
   },
   {
     id: "10",
@@ -199,13 +297,18 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1601598765-c7d0e51f68e0?w=600&h=600&fit=crop&auto=format",
     category: "materials",
     subcategory: "مواد تأسيس",
+    sizes: [
+      { label: "4 لتر", price: 18.0 },
+      { label: "18 لتر", price: 65.0 },
+    ],
+    basicColorPrice: 18.0,
     colors: [],
+    showContactForOtherColors: false,
     inStock: true,
     featured: false,
     rating: 4.7,
     reviews: 88,
     unit: "علبة",
-    size: "18 لتر",
   },
   {
     id: "11",
@@ -217,13 +320,15 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop&auto=format",
     category: "materials",
     subcategory: "أدوات الدهان",
+    sizes: [{ label: "23 سم", price: 4.5 }],
+    basicColorPrice: 4.5,
     colors: [],
+    showContactForOtherColors: false,
     inStock: true,
     featured: false,
     rating: 4.4,
     reviews: 156,
     unit: "قطعة",
-    size: "23 سم",
   },
   {
     id: "12",
@@ -235,12 +340,14 @@ export const INIT_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1580465446361-8aae5321522b?w=600&h=600&fit=crop&auto=format",
     category: "materials",
     subcategory: "أدوات الدهان",
+    sizes: [{ label: "4 بوصة", price: 2.5 }],
+    basicColorPrice: 2.5,
     colors: [],
+    showContactForOtherColors: false,
     inStock: true,
     featured: false,
     rating: 4.3,
     reviews: 203,
     unit: "قطعة",
-    size: "4 بوصة",
   },
 ];

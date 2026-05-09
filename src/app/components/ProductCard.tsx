@@ -11,6 +11,9 @@ export function ProductCard({
   onAdd: (p: Product) => void;
   onView: (p: Product) => void;
 }) {
+  const displayPrice = product.sizes.length > 0 ? product.sizes[0].price : product.price;
+  const hasMoreSizes = product.sizes.length > 1;
+
   return (
     <div className="bg-white border border-border rounded-xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
       <div className="relative aspect-square bg-secondary overflow-hidden">
@@ -43,30 +46,37 @@ export function ProductCard({
           <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
             {product.subcategory}
           </span>
-          <span className="text-[10px] text-muted-foreground">
-            {product.size}
-          </span>
+          {product.sizes.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              {product.sizes[0].label}
+              {hasMoreSizes && ` +${product.sizes.length - 1}`}
+            </span>
+          )}
         </div>
-        <h3 className="font-bold text-foreground text-sm mb-1">
-          {product.name}
-        </h3>
+        <h3 className="font-bold text-foreground text-sm mb-1">{product.name}</h3>
         <StarRating rating={product.rating} reviews={product.reviews} />
         {product.colors.length > 0 && (
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-2 items-center">
             {product.colors.slice(0, 6).map((c, i) => (
               <div
                 key={i}
-                title={c}
+                title={c.name || c.hex}
                 className="w-4 h-4 rounded-full border border-border cursor-pointer hover:scale-125 transition-transform"
-                style={{ backgroundColor: c }}
+                style={{ backgroundColor: c.hex }}
               />
             ))}
+            {product.colors.length > 6 && (
+              <span className="text-[10px] text-muted-foreground">+{product.colors.length - 6}</span>
+            )}
           </div>
         )}
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
           <div className="flex items-baseline gap-1">
+            {hasMoreSizes && (
+              <span className="text-[10px] text-muted-foreground">يبدأ من</span>
+            )}
             <span className="text-xl font-black text-primary">
-              {product.price.toFixed(3)}
+              {displayPrice.toFixed(3)}
             </span>
             <span className="text-xs text-muted-foreground">ر.ع</span>
           </div>
