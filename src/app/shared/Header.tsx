@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import { ShoppingCart, Menu, X, Phone, MapPin, Mail } from "lucide-react";
 import logo from "../../imports/photo-1700901555562-952f0008a11f.jpeg_-_Copy.png";
+import { subscribeToSiteInfo } from "../../lib/firestore";
+import { INIT_SITE_INFO } from "../constants";
 
 export function Header({
   cartCount,
@@ -12,6 +14,12 @@ export function Header({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const [siteInfo, setSiteInfo] = useState(INIT_SITE_INFO);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteInfo(setSiteInfo);
+    return unsub;
+  }, []);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -30,23 +38,23 @@ export function Header({
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center md:justify-between gap-3">
           <div className="flex items-center gap-4">
             <a
-              href="tel:+96891234567"
+              href={`tel:${siteInfo.phone.replace(/\s/g, "")}`}
               className="flex items-center gap-1.5 hover:text-blue-200 transition-colors"
             >
               <Phone size={12} />
-              <span>+968 9123 4567</span>
+              <span dir="ltr">{siteInfo.phone}</span>
             </a>
             <a
-              href="mailto:info@nasreen.om"
+              href={`mailto:${siteInfo.email}`}
               className="hidden sm:flex items-center gap-1.5 hover:text-blue-200 transition-colors"
             >
               <Mail size={12} />
-              <span>info@nasreen.om</span>
+              <span>{siteInfo.email}</span>
             </a>
           </div>
           <div className="flex items-center gap-1.5">
             <MapPin size={12} />
-            <span>مسقط، سلطنة عُمان</span>
+            <span>{siteInfo.address}</span>
           </div>
         </div>
       </div>
