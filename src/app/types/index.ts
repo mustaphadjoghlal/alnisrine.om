@@ -6,13 +6,6 @@ export interface SizeOption {
   price: number;
 }
 
-export interface ColorOption {
-  hex: string;
-  name?: string;
-  price?: number;
-  isPopular?: boolean;
-}
-
 export interface SiteInfo {
   storeName: string;
   mission: string;
@@ -38,9 +31,6 @@ export interface Product {
   category: Category;
   subcategory: string;
   sizes: SizeOption[];
-  basicColorPrice: number;
-  colors: ColorOption[];
-  showContactForOtherColors: boolean;
   inStock: boolean;
   featured: boolean;
   rating: number;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Check, Plus, Trash2 } from "lucide-react";
-import type { Product, Category, SizeOption, ColorOption } from "../types";
+import type { Product, Category, SizeOption } from "../types";
 
 const EMPTY_FORM: Omit<Product, "id"> = {
   name: "",
@@ -10,9 +10,6 @@ const EMPTY_FORM: Omit<Product, "id"> = {
   category: "interior",
   subcategory: "",
   sizes: [],
-  basicColorPrice: 0,
-  colors: [],
-  showContactForOtherColors: false,
   inStock: true,
   featured: false,
   rating: 4.5,
@@ -36,11 +33,6 @@ export function ProductForm({
   const [sizeLabel, setSizeLabel] = useState("");
   const [sizePrice, setSizePrice] = useState("");
 
-  const [colorHex, setColorHex] = useState("#FFFFFF");
-  const [colorName, setColorName] = useState("");
-  const [colorPrice, setColorPrice] = useState("");
-  const [colorIsPopular, setColorIsPopular] = useState(false);
-
   const set = (key: keyof Omit<Product, "id">, val: unknown) =>
     setForm((f) => ({ ...f, [key]: val }));
 
@@ -61,27 +53,6 @@ export function ProductForm({
     set("sizes", updated);
     if (updated.length > 0) set("price", updated[0].price);
   };
-
-  const addColor = () => {
-    if (!/^#[0-9A-Fa-f]{6}$/.test(colorHex)) return;
-    const newColor: ColorOption = {
-      hex: colorHex,
-      name: colorName.trim() || undefined,
-      isPopular: colorIsPopular,
-    };
-    const parsedPrice = parseFloat(colorPrice);
-    if (!isNaN(parsedPrice) && parsedPrice > 0) {
-      newColor.price = parsedPrice;
-    }
-    set("colors", [...form.colors, newColor]);
-    setColorHex("#FFFFFF");
-    setColorName("");
-    setColorPrice("");
-    setColorIsPopular(false);
-  };
-
-  const removeColor = (i: number) =>
-    set("colors", form.colors.filter((_, j) => j !== i));
 
   const handleSave = () => {
     if (!form.name.trim() || !form.image.trim()) return;
@@ -221,110 +192,6 @@ export function ProductForm({
             ) : (
               <p className="text-xs text-muted-foreground">لم يتم إضافة أي حجم بعد</p>
             )}
-          </div>
-
-          <div className="border border-border rounded-xl p-4">
-            <label className="text-sm font-bold text-foreground mb-3 block">الألوان والأسعار</label>
-
-            <div className="mb-3">
-              <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                سعر اللون الأساسي (basic) — ر.ع
-              </label>
-              <input
-                type="number"
-                step="0.001"
-                min="0"
-                value={form.basicColorPrice}
-                onChange={(e) => set("basicColorPrice", parseFloat(e.target.value) || 0)}
-                className="w-40 border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                placeholder="0.000"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-3">
-              <div className="flex items-center gap-1 border border-border rounded-lg px-2 py-1.5 bg-secondary">
-                <input
-                  type="color"
-                  value={colorHex}
-                  onChange={(e) => setColorHex(e.target.value)}
-                  className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
-                />
-                <span className="text-xs text-muted-foreground" dir="ltr">{colorHex}</span>
-              </div>
-              <input
-                value={colorName}
-                onChange={(e) => setColorName(e.target.value)}
-                className="flex-1 min-w-24 border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                placeholder="اسم اللون (اختياري)"
-              />
-              <input
-                type="number"
-                step="0.001"
-                min="0"
-                value={colorPrice}
-                onChange={(e) => setColorPrice(e.target.value)}
-                className="w-28 border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                placeholder="سعر خاص"
-              />
-            </div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <div
-                  onClick={() => setColorIsPopular(!colorIsPopular)}
-                  className={`w-9 h-5 rounded-full transition-colors relative ${colorIsPopular ? "bg-amber-500" : "bg-gray-300"}`}
-                >
-                  <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all ${colorIsPopular ? "right-0.5" : "left-0.5"}`} />
-                </div>
-                <span className="font-semibold">لون مشهور (الأكثر طلباً)</span>
-              </label>
-              <button
-                onClick={addColor}
-                className="bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition-colors flex items-center gap-1"
-              >
-                <Plus size={14} />
-                إضافة لون
-              </button>
-            </div>
-
-            {form.colors.length > 0 ? (
-              <div className="space-y-2">
-                {form.colors.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between bg-secondary rounded-lg px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: c.hex }} />
-                      <span className="text-sm font-semibold">{c.name || c.hex}</span>
-                      {c.isPopular && (
-                        <span className="text-[10px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded-full">مشهور</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {c.price != null ? (
-                        <span className="text-sm font-bold text-blue-700">{c.price.toFixed(3)} ر.ع</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">سعر أساسي</span>
-                      )}
-                      <button onClick={() => removeColor(i)} className="text-red-500 hover:text-red-700">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">لم يتم إضافة أي لون بعد</p>
-            )}
-
-            <div className="mt-3 pt-3 border-t border-border">
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <div
-                  onClick={() => set("showContactForOtherColors", !form.showContactForOtherColors)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${form.showContactForOtherColors ? "bg-blue-700" : "bg-gray-300"}`}
-                >
-                  <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all ${form.showContactForOtherColors ? "right-0.5" : "left-0.5"}`} />
-                </div>
-                <span className="font-semibold">إظهار زر التواصل للألوان غير المتاحة</span>
-              </label>
-            </div>
           </div>
 
           <div>

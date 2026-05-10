@@ -55,22 +55,7 @@ export function ProductCard({
         </div>
         <h3 className="font-bold text-foreground text-sm mb-1">{product.name}</h3>
         <StarRating rating={product.rating} reviews={product.reviews} />
-        {product.colors.length > 0 && (
-          <div className="flex gap-1 mt-2 items-center">
-            {product.colors.slice(0, 6).map((c, i) => (
-              <div
-                key={i}
-                title={c.name || c.hex}
-                className="w-4 h-4 rounded-full border border-border cursor-pointer hover:scale-125 transition-transform"
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
-            {product.colors.length > 6 && (
-              <span className="text-[10px] text-muted-foreground">+{product.colors.length - 6}</span>
-            )}
-          </div>
-        )}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+<div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
           <div className="flex items-baseline gap-1">
             {hasMoreSizes && (
               <span className="text-[10px] text-muted-foreground">يبدأ من</span>

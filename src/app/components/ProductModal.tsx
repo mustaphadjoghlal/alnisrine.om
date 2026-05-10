@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, ShoppingCart, Plus, Minus, MessageCircle } from "lucide-react";
-import type { Product, ColorOption } from "../types";
+import { X, ShoppingCart, Plus, Minus } from "lucide-react";
+import type { Product } from "../types";
 import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
 import { StarRating } from "./StarRating";
 import { WhatsAppSvg } from "./WhatsAppSvg";
@@ -26,29 +26,14 @@ export function ProductModal({
 
   const [qty, setQty] = useState(1);
   const [selectedSizeIdx, setSelectedSizeIdx] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(
-    product.colors.length > 0 ? product.colors[0] : null
-  );
 
   const hasSizes = product.sizes.length > 0;
   const selectedSize = hasSizes ? product.sizes[selectedSizeIdx] : null;
   const displayPrice = selectedSize ? selectedSize.price : product.price;
 
-  const colorPrice = selectedColor?.price != null
-    ? selectedColor.price
-    : product.basicColorPrice;
-
-  const popularColors = product.colors.filter((c) => c.isPopular);
-  const otherColors = product.colors.filter((c) => !c.isPopular);
-
   const waText = encodeURIComponent(
     `مرحباً، أرغب في الاستفسار عن: ${product.name}` +
-    (selectedSize ? ` - ${selectedSize.label}` : "") +
-    (selectedColor ? ` - ${selectedColor.name || selectedColor.hex}` : "")
-  );
-
-  const colorWaText = encodeURIComponent(
-    `مرحباً، أرغب في معرفة سعر لون خاص لمنتج: ${product.name}`
+    (selectedSize ? ` - ${selectedSize.label}` : "")
   );
 
   return (
@@ -112,82 +97,6 @@ export function ProductModal({
                     </option>
                   ))}
                 </select>
-              </div>
-            )}
-
-            {product.colors.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-2">الألوان المتاحة</p>
-
-                {popularColors.length > 0 && (
-                  <div className="mb-2">
-                    <p className="text-[10px] text-amber-600 font-bold mb-1">الأكثر طلباً</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {popularColors.map((c, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setSelectedColor(c)}
-                          title={c.name || c.hex}
-                          className={`relative group w-8 h-8 rounded-full border-2 transition-all ${selectedColor?.hex === c.hex ? "border-primary scale-125" : "border-border hover:scale-110"}`}
-                          style={{ backgroundColor: c.hex }}
-                        >
-                          {c.price != null && (
-                            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-blue-700 whitespace-nowrap hidden group-hover:block bg-white px-1 rounded shadow">
-                              {c.price.toFixed(3)}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {otherColors.length > 0 && (
-                  <div className="mb-2">
-                    <p className="text-[10px] text-muted-foreground font-semibold mb-1">ألوان أخرى</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {otherColors.map((c, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setSelectedColor(c)}
-                          title={c.name || c.hex}
-                          className={`w-7 h-7 rounded-full border-2 transition-all ${selectedColor?.hex === c.hex ? "border-primary scale-125" : "border-border hover:scale-110"}`}
-                          style={{ backgroundColor: c.hex }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {selectedColor && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: selectedColor.hex }} />
-                    <span className="text-xs text-muted-foreground">
-                      {selectedColor.name || selectedColor.hex}
-                    </span>
-                    {selectedColor.price != null ? (
-                      <span className="text-xs font-bold text-blue-700">
-                        {selectedColor.price.toFixed(3)} ر.ع
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        ({colorPrice.toFixed(3)} ر.ع)
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {product.showContactForOtherColors && (
-                  <a
-                    href={`https://wa.me/${whatsapp}?text=${colorWaText}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors w-fit"
-                  >
-                    <MessageCircle size={14} />
-                    لونك غير موجود؟ تواصل معنا لمعرفة السعر
-                  </a>
-                )}
               </div>
             )}
 
