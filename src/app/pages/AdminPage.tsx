@@ -16,6 +16,7 @@ import {
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo } from "../../lib/firestore";
+import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo } from "../types";
 import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
@@ -39,7 +40,8 @@ export function AdminPage() {
   const [siteInfo, setSiteInfo] = useState<SiteInfo>(INIT_SITE_INFO);
   const [siteInfoSaved, setSiteInfoSaved] = useState(false);
   const [savingSiteInfo, setSavingSiteInfo] = useState(false);
-  // Track Firebase auth state
+  const [uploadingCat, setUploadingCat] = useState<string | null>(null);
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       setLoggedIn(!!user);
@@ -48,14 +50,12 @@ export function AdminPage() {
     return unsub;
   }, []);
 
-  // Subscribe to products from Firestore when logged in
   useEffect(() => {
     if (!loggedIn) return;
     const unsub = subscribeToProducts(setProducts);
     return unsub;
   }, [loggedIn]);
 
-  // Subscribe to site info from Firestore when logged in
   useEffect(() => {
     if (!loggedIn) return;
     const unsub = subscribeToSiteInfo(setSiteInfo);
@@ -109,6 +109,16 @@ export function AdminPage() {
 
   const setSiteField = (key: keyof SiteInfo, val: string) =>
     setSiteInfo((prev) => ({ ...prev, [key]: val }));
+
+  const handleCategoryImageUpload = async (cat: "interior" | "exterior" | "materials", file: File) => {
+    setUploadingCat(cat);
+    const url = await uploadCategoryImage(file, cat);
+    setSiteInfo((prev) => ({
+      ...prev,
+      categoryImages: { ...prev.categoryImages, [cat]: url },
+    }));
+    setUploadingCat(null);
+  };
 
   const stats = {
     total: products.length,
@@ -354,6 +364,39 @@ export function AdminPage() {
               <div>
                 <label className="text-sm font-semibold text-foreground mb-1 block">ساعات العمل</label>
                 <input value={siteInfo.workingHours} onChange={(e) => setSiteField("workingHours", e.target.value)} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-blue-600/30" placeholder="السبت - الخميس: 8:00 ص - 8:00 م" />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-foreground mb-3 block">صور التصنيفات</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(["interior", "exterior", "materials"] as const).map((cat) => {
+                    const labels = { interior: "أصباغ داخلية", exterior: "أصباغ خارجية", materials: "مواد بناء" };
+                    return (
+                      <div key={cat} className="border border-border rounded-lg overflow-hidden">
+                        <img
+                          src={siteInfo.categoryImages?.[cat]}
+                          alt={labels[cat]}
+                          className="w-full h-32 object-cover"
+                        />
+                        <div className="p-2">
+                          <p className="text-xs font-semibold text-center mb-2">{labels[cat]}</p>
+                          <label className="flex items-center justify-center gap-1 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-1.5 rounded-lg transition-colors">
+                            {uploadingCat === cat ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                            تغيير الصورة
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleCategoryImageUpload(cat, file);
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
