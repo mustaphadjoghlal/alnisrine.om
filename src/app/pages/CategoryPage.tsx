@@ -18,7 +18,7 @@ export function CategoryPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
   const [showInStock, setShowInStock] = useState(false);
-  const [catImages, setCatImages] = useState(INIT_SITE_INFO.categoryImages);
+  const [catImages, setCatImages] = useState<typeof INIT_SITE_INFO.categoryImages | null>(null);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);
@@ -27,7 +27,7 @@ export function CategoryPage() {
 
   useEffect(() => {
     const unsub = subscribeToSiteInfo((info) => {
-      if (info.categoryImages) setCatImages(info.categoryImages);
+      setCatImages(info.categoryImages ?? null);
     });
     return unsub;
   }, []);
@@ -55,7 +55,7 @@ export function CategoryPage() {
     <div className="min-h-screen">
       <section
         className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white py-16 px-4"
-        style={catImages[category] ? {
+        style={catImages?.[category] ? {
           backgroundImage: `linear-gradient(rgba(29, 78, 216, 0.9), rgba(30, 64, 175, 0.9)), url(${catImages[category]})`,
           backgroundSize: "cover",
           backgroundPosition: "center",

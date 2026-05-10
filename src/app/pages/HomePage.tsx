@@ -13,7 +13,7 @@ export function HomePage() {
   }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [catImages, setCatImages] = useState(INIT_SITE_INFO.categoryImages);
+  const [catImages, setCatImages] = useState<typeof INIT_SITE_INFO.categoryImages | null>(null);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);
@@ -22,7 +22,7 @@ export function HomePage() {
 
   useEffect(() => {
     const unsub = subscribeToSiteInfo((info) => {
-      if (info.categoryImages) setCatImages(info.categoryImages);
+      setCatImages(info.categoryImages ?? null);
     });
     return unsub;
   }, []);
@@ -60,20 +60,22 @@ export function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="hidden lg:block">
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(catImages).map(([key, img]) => img ? (
-                  <img
-                    key={key}
-                    src={img}
-                    alt={CAT_LABELS[key as keyof typeof CAT_LABELS]}
-                    className="rounded-2xl shadow-2xl h-48 w-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div key={key} className="rounded-2xl shadow-2xl h-48 w-full bg-blue-600/30" />
-                ))}
+            {catImages && (
+              <div className="hidden lg:block">
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(catImages).map(([key, img]) => img ? (
+                    <img
+                      key={key}
+                      src={img}
+                      alt={CAT_LABELS[key as keyof typeof CAT_LABELS]}
+                      className="rounded-2xl shadow-2xl h-48 w-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div key={key} className="rounded-2xl shadow-2xl h-48 w-full bg-blue-600/30" />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -158,7 +160,7 @@ export function HomePage() {
                   className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="aspect-[4/3] relative bg-blue-800">
-                    {catImages[cat] && (
+                    {catImages?.[cat] && (
                       <img
                         src={catImages[cat]}
                         alt={CAT_LABELS[cat]}
