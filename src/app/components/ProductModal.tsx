@@ -136,6 +136,9 @@ export function ProductModal({
               <WhatsAppSvg className="w-5 h-5" />
               استفسار عبر واتساب
             </a>
+            <p className="text-xs text-muted-foreground text-center">
+              * السعر قابل للتغيير بعد تحديد اللون عند التواصل
+            </p>
           </div>
         </div>
       </div>
