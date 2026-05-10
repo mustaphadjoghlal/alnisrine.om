@@ -7,13 +7,13 @@ export function CartDrawer({
   onClose,
   onUpdate,
   onRemove,
-  onCheckout,
+  checkoutUrl,
 }: {
   cart: CartItem[];
   onClose: () => void;
   onUpdate: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
-  onCheckout: () => void;
+  checkoutUrl: string;
 }) {
   const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
 
@@ -99,13 +99,15 @@ export function CartDrawer({
                   {total.toFixed(3)} ر.ع
                 </span>
               </div>
-              <button
-                onClick={onCheckout}
+              <a
+                href={checkoutUrl}
+                target="_blank"
+                rel="noreferrer"
                 className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
               >
                 <WhatsAppSvg className="w-5 h-5" />
                 إتمام الطلب عبر واتساب
-              </button>
+              </a>
             </div>
           </>
         )}

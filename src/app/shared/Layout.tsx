@@ -60,7 +60,7 @@ export function Layout() {
     setCart((prev) => prev.filter((i) => i.product.id !== id));
   };
 
-  const handleCheckout = () => {
+  const checkoutUrl = (() => {
     const items = cart
       .map(
         (i) =>
@@ -69,11 +69,8 @@ export function Layout() {
       .join("\n");
     const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
     const msg = `مرحباً، أرغب في إتمام الطلب التالي:\n\n${items}\n\n*الإجمالي:* ${total.toFixed(3)} ر.ع`;
-    window.open(
-      `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`,
-      "_blank"
-    );
-  };
+    return `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+  })();
 
   return (
     <div className="min-h-screen flex flex-col" dir="rtl">
@@ -88,7 +85,7 @@ export function Layout() {
           onClose={() => setCartOpen(false)}
           onUpdate={updateCart}
           onRemove={removeFromCart}
-          onCheckout={handleCheckout}
+          checkoutUrl={checkoutUrl}
         />
       )}
     </div>
