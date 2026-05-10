@@ -4,6 +4,7 @@ import {
   setDoc,
   deleteDoc,
   onSnapshot,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Product, SiteInfo } from "../app/types";
@@ -32,6 +33,10 @@ export function subscribeToSiteInfo(callback: (info: SiteInfo) => void) {
   });
 }
 
-export async function saveSiteInfo(info: SiteInfo): Promise<void> {
-  await setDoc(doc(db, "siteConfig", "info"), info);
+export async function saveSiteInfo(info: Omit<SiteInfo, "categoryImages">): Promise<void> {
+  await setDoc(doc(db, "siteConfig", "info"), info, { merge: true });
+}
+
+export async function saveCategoryImage(cat: string, url: string): Promise<void> {
+  await updateDoc(doc(db, "siteConfig", "info"), { [`categoryImages.${cat}`]: url });
 }

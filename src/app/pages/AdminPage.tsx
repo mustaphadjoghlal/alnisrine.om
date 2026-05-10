@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo } from "../../lib/firestore";
+import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage } from "../../lib/firestore";
 import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo } from "../types";
@@ -103,7 +103,8 @@ export function AdminPage() {
 
   const handleSaveSiteInfo = async () => {
     setSavingSiteInfo(true);
-    await saveSiteInfo(siteInfo);
+    const { categoryImages, ...textFields } = siteInfo;
+    await saveSiteInfo(textFields);
     setSavingSiteInfo(false);
     setSiteInfoSaved(true);
     setTimeout(() => setSiteInfoSaved(false), 2500);
@@ -116,12 +117,7 @@ export function AdminPage() {
     setUploadingCat(cat);
     try {
       const url = await uploadCategoryImage(file, cat);
-      const updated = {
-        ...siteInfo,
-        categoryImages: { ...siteInfo.categoryImages, [cat]: url },
-      };
-      setSiteInfo(updated);
-      await saveSiteInfo(updated);
+      await saveCategoryImage(cat, url);
     } catch (e) {
       console.error("فشل رفع الصورة:", e);
       alert("فشل رفع الصورة. تحقق من إعدادات Firebase Storage.");
