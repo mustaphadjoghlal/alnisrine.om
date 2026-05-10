@@ -68,7 +68,7 @@ export function ContactPage() {
             </div>
 
             <a
-              href={`https://wa.me/${info.whatsappNumber}?text=${encodeURIComponent("مرحباً، أرغب في الاستفسار عن منتجاتكم")}`}
+              href={`https://api.whatsapp.com/send?phone=${info.whatsappNumber}&text=${encodeURIComponent("مرحباً، أرغب في الاستفسار عن منتجاتكم")}`}
               target="_blank"
               rel="noreferrer"
               className="mt-8 w-full bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"

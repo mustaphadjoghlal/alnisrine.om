@@ -46,7 +46,7 @@ export function CraftsmanRequest() {
         `الموقع: ${location}\n` +
         (notes ? `ملاحظات: ${notes}` : "")
       );
-      window.open(`https://wa.me/${whatsapp}?text=${waText}`, "_blank");
+      window.open(`https://api.whatsapp.com/send?phone=${whatsapp}&text=${waText}`, "_blank");
 
       setDone(true);
       setName(""); setPhone(""); setServiceDesc(""); setLocation(""); setNotes("");
@@ -188,7 +188,7 @@ export function CraftsmanRequest() {
             </div>
 
             <a
-              href={`https://wa.me/${whatsapp}`}
+              href={`https://api.whatsapp.com/send?phone=${whatsapp}`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 bg-green-500 text-white font-bold py-4 px-5 rounded-2xl hover:bg-green-600 transition-colors shadow-md"

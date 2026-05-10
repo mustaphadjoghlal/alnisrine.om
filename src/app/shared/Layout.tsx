@@ -69,7 +69,7 @@ export function Layout() {
       .join("\n");
     const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
     const msg = `مرحباً، أرغب في إتمام الطلب التالي:\n\n${items}\n\n*الإجمالي:* ${total.toFixed(3)} ر.ع`;
-    return `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+    return `https://api.whatsapp.com/send?phone=${whatsapp}&text=${encodeURIComponent(msg)}`;
   })();
 
   return (

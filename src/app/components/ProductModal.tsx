@@ -128,7 +128,7 @@ export function ProductModal({
             </button>
 
             <a
-              href={`https://wa.me/${whatsapp}?text=${waText}`}
+              href={`https://api.whatsapp.com/send?phone=${whatsapp}&text=${waText}`}
               target="_blank"
               rel="noreferrer"
               className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
