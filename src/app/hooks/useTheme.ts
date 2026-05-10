@@ -85,7 +85,7 @@ function generateShades(brandHex: string) {
 
 // ── Apply ─────────────────────────────────────────────────────────────────────
 
-function applyTheme(colors: ThemeColors) {
+export function applyTheme(colors: ThemeColors) {
   const r = document.documentElement;
 
   // Override ALL Tailwind blue-* shades so bg-blue-*, text-blue-*, etc. change

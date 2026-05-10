@@ -45,3 +45,13 @@ export async function saveCategoryImage(cat: string, url: string): Promise<void>
 export async function addServiceRequest(req: Omit<ServiceRequest, "id">): Promise<void> {
   await addDoc(collection(db, "serviceRequests"), req);
 }
+
+export async function saveThemeColors(colors: Record<string, string>): Promise<void> {
+  await setDoc(doc(db, "siteConfig", "theme"), colors);
+}
+
+export function subscribeToThemeColors(callback: (colors: Record<string, string> | null) => void) {
+  return onSnapshot(doc(db, "siteConfig", "theme"), (snap) => {
+    callback(snap.exists() ? (snap.data() as Record<string, string>) : null);
+  });
+}

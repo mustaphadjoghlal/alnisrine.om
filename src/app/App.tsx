@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { Layout } from "./shared/Layout";
 import { HomePage } from "./pages/HomePage";
@@ -6,7 +7,8 @@ import { AboutPage } from "./pages/AboutPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { initTheme } from "./hooks/useTheme";
+import { initTheme, applyTheme, DEFAULT_THEME } from "./hooks/useTheme";
+import { subscribeToThemeColors } from "../lib/firestore";
 
 initTheme();
 
@@ -28,5 +30,15 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
+  useEffect(() => {
+    const unsub = subscribeToThemeColors((colors) => {
+      if (colors) {
+        applyTheme({ ...DEFAULT_THEME, ...colors } as typeof DEFAULT_THEME);
+        localStorage.setItem("alnisrine-theme", JSON.stringify(colors));
+      }
+    });
+    return unsub;
+  }, []);
+
   return <RouterProvider router={router} />;
 }

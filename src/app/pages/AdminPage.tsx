@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage } from "../../lib/firestore";
+import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors } from "../../lib/firestore";
 import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo } from "../types";
@@ -50,7 +50,8 @@ export function AdminPage() {
   const [draftColors, setDraftColors] = useState<ThemeColors>({ ...themeColors });
   const [themeSaved, setThemeSaved] = useState(false);
 
-  const handleSaveTheme = () => {
+  const handleSaveTheme = async () => {
+    await saveThemeColors(draftColors as unknown as Record<string, string>);
     saveTheme(draftColors);
     setThemeSaved(true);
     setTimeout(() => setThemeSaved(false), 2500);
