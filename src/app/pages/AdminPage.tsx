@@ -12,7 +12,6 @@ import {
   Info,
   Save,
   Loader2,
-  Upload,
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
@@ -40,8 +39,6 @@ export function AdminPage() {
   const [siteInfo, setSiteInfo] = useState<SiteInfo>(INIT_SITE_INFO);
   const [siteInfoSaved, setSiteInfoSaved] = useState(false);
   const [savingSiteInfo, setSavingSiteInfo] = useState(false);
-  const [importing, setImporting] = useState(false);
-
   // Track Firebase auth state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -112,43 +109,6 @@ export function AdminPage() {
 
   const setSiteField = (key: keyof SiteInfo, val: string) =>
     setSiteInfo((prev) => ({ ...prev, [key]: val }));
-
-  const JOTUN_PRODUCTS: Omit<Product, "id">[] = [
-    { name: "جوتاشيلد إكستريم", description: "دهان أكريليك خارجي فائق الجودة يوفر حماية متطورة للواجهات ضد الظروف المناخية القاسية، مع تقنية الحماية الفائقة من الشمس والحرارة", category: "exterior", subcategory: "الواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد كولرز", description: "دهان خارجي بألوان عصرية متنوعة يحافظ على رونقه وبريقه لفترات طويلة مع مقاومة ممتازة للعوامل الجوية", category: "exterior", subcategory: "الواجهات والجدران الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد ألترا ريبل", description: "دهان خارجي بتقنية الطلاء الذاتي التنظيف يمنع التصاق الأوساخ والغبار، مما يحافظ على نظافة الواجهات لفترة أطول", category: "exterior", subcategory: "الواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "ماكسي", description: "دهان داخلي إيمالشن اقتصادي يوفر تغطية جيدة وملمس ناعم للجدران والأسقف الداخلية بجودة عالية", category: "interior", subcategory: "الجدران والأسقف الداخلية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "ليدي بيور كولر", description: "دهان داخلي صديق للبيئة بمكونات طبيعية وألوان عصرية، مثالي للمنازل الصحية وغرف الأطفال", category: "interior", subcategory: "الجدران الداخلية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتن سينس", description: "دهان داخلي متطور بتقنية مضادة للبكتيريا والفطريات، مثالي للمطابخ والحمامات والمستشفيات", category: "interior", subcategory: "الجدران والأسقف الداخلية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد كولر إكستريم", description: "دهان خارجي بألوان داكنة مبتكرة مع تقنية عكس الحرارة، يحافظ على برودة السطح ويمنع التشقق الناتج عن الحرارة", category: "exterior", subcategory: "الواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "فينوماستيك إيمالشن", description: "دهان داخلي كلاسيكي بجودة موثوقة يوفر تغطية ممتازة وملمس ناعم للجدران الداخلية", category: "interior", subcategory: "الجدران والأسقف الداخلية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "ليدي سوبريم فينيش", description: "دهان داخلي فائق الجودة بلمسة نهائية حريرية فاخرة، مثالي للصالات وغرف الاستقبال الراقية", category: "interior", subcategory: "الجدران الداخلية الراقية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد أنتي مولد", description: "دهان متخصص بتركيبة مضادة للعفن والفطريات، مثالي للمناطق عالية الرطوبة والحمامات والمطابخ", category: "materials", subcategory: "المناطق الرطبة والحمامات", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد تيكس", description: "دهان خارجي بملمس محبب ديكوري يخفي عيوب الأسطح ويعطي مظهراً جمالياً مميزاً للواجهات", category: "exterior", subcategory: "الواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد كولر لاست", description: "دهان خارجي بتقنية حماية اللون المتقدمة يضمن ثبات الألوان لمدة 15 سنة دون بهتان", category: "exterior", subcategory: "الواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتن مالتي برايمر", description: "طلاء أساس متعدد الاستخدامات يصلح لمختلف الأسطح كالخشب والمعدن والجبس، يوفر التصاقاً قوياً للطبقة النهائية", category: "materials", subcategory: "أساس للأسطح المختلفة", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "ليدي ديزاينر تشويس", description: "مجموعة دهانات داخلية فاخرة بألوان مختارة من قبل مصممي الديكور، توفر أناقة استثنائية للمساحات الداخلية", category: "interior", subcategory: "التصاميم الداخلية الراقية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "بينجوين إنامل", description: "دهان زيتي لامع عالي الجودة للأخشاب والمعادن، يوفر حماية متينة ومظهراً أنيقاً للأبواب والنوافذ", category: "materials", subcategory: "الأبواب والنوافذ والحديد", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد برايمر", description: "طلاء أساس خارجي متخصص يحمي الجدران من القلويات ويضمن التصاقاً مثالياً لطبقة الدهان النهائية", category: "materials", subcategory: "أساس للواجهات الخارجية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "ليدي بالانس", description: "دهان داخلي ذكي ينظم رطوبة الغرفة ويمنع نمو البكتيريا، مثالي لخلق بيئة داخلية صحية ومريحة", category: "interior", subcategory: "الجدران الداخلية", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-    { name: "جوتاشيلد سيلر", description: "مادة عازلة تحضيرية تعالج مسامية الأسطح وتوحد الامتصاص، مما يوفر استهلاك الدهان ويحسن النتيجة النهائية", category: "materials", subcategory: "معالجة الأسطح قبل الدهان", price: 0, image: "", sizes: [], basicColorPrice: 0, colors: [], showContactForOtherColors: false, inStock: true, featured: false, rating: 0, reviews: 0, unit: "لتر" },
-  ];
-
-  const handleImportProducts = async () => {
-    const existingNames = new Set(products.map((p) => p.name));
-    const toImport = JOTUN_PRODUCTS.filter((p) => !existingNames.has(p.name));
-    if (toImport.length === 0) {
-      alert("جميع المنتجات موجودة بالفعل.");
-      return;
-    }
-    if (!window.confirm(`سيتم إضافة ${toImport.length} منتج. هل تريد المتابعة؟`)) return;
-    setImporting(true);
-    for (const p of toImport) {
-      await saveProduct({ ...p, id: Date.now().toString() + Math.random().toString(36).slice(2) });
-    }
-    setImporting(false);
-    alert(`تم إضافة ${toImport.length} منتج بنجاح! يمكنك الآن إضافة الصورة والسعر لكل منتج.`);
-  };
 
   const stats = {
     total: products.length,
@@ -283,23 +243,13 @@ export function AdminPage() {
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-foreground">إدارة المنتجات</h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleImportProducts}
-                    disabled={importing}
-                    className="bg-green-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-60"
-                  >
-                    {importing ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                    استيراد منتجات جوتن
-                  </button>
-                  <button
-                    onClick={() => { setEditingProduct(null); setShowForm(true); }}
-                    className="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2"
-                  >
-                    <PlusCircle size={18} />
-                    إضافة منتج جديد
-                  </button>
-                </div>
+                <button
+                  onClick={() => { setEditingProduct(null); setShowForm(true); }}
+                  className="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2"
+                >
+                  <PlusCircle size={18} />
+                  إضافة منتج جديد
+                </button>
               </div>
 
               <div className="overflow-x-auto">
