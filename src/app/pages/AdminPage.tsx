@@ -114,12 +114,20 @@ export function AdminPage() {
 
   const handleCategoryImageUpload = async (cat: "interior" | "exterior" | "materials", file: File) => {
     setUploadingCat(cat);
-    const url = await uploadCategoryImage(file, cat);
-    setSiteInfo((prev) => ({
-      ...prev,
-      categoryImages: { ...prev.categoryImages, [cat]: url },
-    }));
-    setUploadingCat(null);
+    try {
+      const url = await uploadCategoryImage(file, cat);
+      const updated = {
+        ...siteInfo,
+        categoryImages: { ...siteInfo.categoryImages, [cat]: url },
+      };
+      setSiteInfo(updated);
+      await saveSiteInfo(updated);
+    } catch (e) {
+      console.error("فشل رفع الصورة:", e);
+      alert("فشل رفع الصورة. تحقق من إعدادات Firebase Storage.");
+    } finally {
+      setUploadingCat(null);
+    }
   };
 
   const stats = {
