@@ -109,3 +109,62 @@ export interface InventoryAlert {
   threshold: number;
   lastAlertDate: string;
 }
+
+// ─── Accountant / Finance ──────────────────────────────────────────────────────
+export interface SaleItem {
+  name: string;
+  qty: number;
+  unit: string;
+  price: number;
+}
+
+export interface SaleRecord {
+  id: string;
+  date: string;
+  customerName: string;
+  customerPhone: string;
+  branch: string;
+  salesperson: string;
+  items: SaleItem[];
+  total: number;
+  notes: string;
+  createdBy: string;
+  createdByEmail: string;
+  createdAt: string;
+}
+
+export interface PurchaseRecord {
+  id: string;
+  date: string;
+  supplier: string;
+  branch: string;
+  items: { name: string; qty: number; unit: string; cost: number }[];
+  total: number;
+  notes: string;
+  createdBy: string;
+  createdByEmail: string;
+  createdAt: string;
+}
+
+export interface InventoryItem {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface BranchStock {
+  branchId: string;
+  items: InventoryItem[];
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  timestamp: string;
+  action: string;
+  entity: string;
+  details: string;
+  byEmail: string;
+  byRole: "manager" | "accountant";
+}

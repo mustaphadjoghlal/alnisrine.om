@@ -1,5 +1,16 @@
 import type { Category, Product, SiteInfo } from "../types";
 
+export const BRANCHES = [
+  { id: "main",      ar: "الفرع الرئيسي",           en: "Main Branch" },
+  { id: "mabila10",  ar: "فرع المعبيلة الشارع 10",   en: "Al Mabila St 10" },
+  { id: "mabila4",   ar: "فرع المعبيلة شارع أربعة",  en: "Al Mabila St 4" },
+  { id: "mabilanew", ar: "فرع المعبيلة الجديد",       en: "New Al Mabila" },
+  { id: "amarat",    ar: "فرع العامرات",              en: "Al Amarat" },
+  { id: "khoudh",    ar: "فرع الخوض",                en: "Al Khoudh" },
+] as const;
+
+export type BranchId = (typeof BRANCHES)[number]["id"];
+
 // ─── Category Constants ───────────────────────────────────────────────────────
 export const CAT_LABELS: Record<Category, string> = {
   interior: "أصباغ داخلية",
