@@ -451,7 +451,6 @@ export function AdminPage() {
             </button>
           </div>
         )}
-      </div>
 
         {tab === "theme" && (
           <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl">
@@ -549,6 +548,7 @@ export function AdminPage() {
             </div>
           </div>
         )}
+      </div>
 
       {showForm && (
         <ProductForm

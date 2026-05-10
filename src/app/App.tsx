@@ -1,7 +1,4 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-import { initTheme } from "./hooks/useTheme";
-
-initTheme();
 import { Layout } from "./shared/Layout";
 import { HomePage } from "./pages/HomePage";
 import { CategoryPage } from "./pages/CategoryPage";
@@ -9,6 +6,9 @@ import { AboutPage } from "./pages/AboutPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { initTheme } from "./hooks/useTheme";
+
+initTheme();
 
 const router = createBrowserRouter([
   { path: "/admin", Component: AdminPage },
