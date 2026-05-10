@@ -15,6 +15,7 @@ initTheme();
 
 const router = createBrowserRouter([
   { path: "/admin", Component: AdminPage },
+  { path: "/accountant", Component: AccountantPage },
   {
     path: "/",
     Component: Layout,
@@ -25,7 +26,6 @@ const router = createBrowserRouter([
       { path: "materials", Component: CategoryPage },
       { path: "about", Component: AboutPage },
       { path: "contact", Component: ContactPage },
-      { path: "accountant", Component: AccountantPage },
       { path: "*", Component: NotFoundPage },
     ],
   },
