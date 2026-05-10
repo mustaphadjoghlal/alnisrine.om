@@ -43,6 +43,22 @@ export interface CartItem {
   quantity: number;
 }
 
+// Service Requests
+export type ServiceType = "painter" | "other";
+export type ServiceStatus = "pending" | "contacted" | "done";
+
+export interface ServiceRequest {
+  id: string;
+  name: string;
+  phone: string;
+  serviceType: ServiceType;
+  serviceDesc: string;
+  location: string;
+  notes: string;
+  createdAt: string;
+  status: ServiceStatus;
+}
+
 // Review System
 export interface Review {
   id: string;

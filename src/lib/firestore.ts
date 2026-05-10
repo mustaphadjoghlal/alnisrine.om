@@ -2,12 +2,13 @@ import {
   collection,
   doc,
   setDoc,
+  addDoc,
   deleteDoc,
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Product, SiteInfo } from "../app/types";
+import type { Product, SiteInfo, ServiceRequest } from "../app/types";
 import { INIT_SITE_INFO } from "../app/constants";
 
 const PRODUCTS_COL = "products";
@@ -39,4 +40,8 @@ export async function saveSiteInfo(info: Omit<SiteInfo, "categoryImages">): Prom
 
 export async function saveCategoryImage(cat: string, url: string): Promise<void> {
   await updateDoc(doc(db, "siteConfig", "info"), { [`categoryImages.${cat}`]: url });
+}
+
+export async function addServiceRequest(req: Omit<ServiceRequest, "id">): Promise<void> {
+  await addDoc(collection(db, "serviceRequests"), req);
 }

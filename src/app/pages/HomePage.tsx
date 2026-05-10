@@ -3,6 +3,8 @@ import { Link, useOutletContext } from "react-router";
 import { ChevronRight, Star, Package, Shield, TrendingUp } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
+import { PaintCalculator } from "../components/PaintCalculator";
+import { CraftsmanRequest } from "../components/CraftsmanRequest";
 import type { Product } from "../types";
 import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
 import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
@@ -187,6 +189,10 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      <CraftsmanRequest />
+
+      <PaintCalculator />
 
       {selectedProduct && (
         <ProductModal
