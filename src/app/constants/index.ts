@@ -38,6 +38,11 @@ export const INIT_SITE_INFO: SiteInfo = {
   email: "info@nasreen.om",
   address: "مسقط، سلطنة عُمان",
   workingHours: "السبت - الخميس: 8:00 ص - 8:00 م",
+  categoryImages: {
+    interior: CAT_IMAGES.interior,
+    exterior: CAT_IMAGES.exterior,
+    materials: CAT_IMAGES.materials,
+  },
 };
 
 // ─── Initial Products ─────────────────────────────────────────────────────────

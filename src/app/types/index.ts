@@ -22,6 +22,11 @@ export interface SiteInfo {
   email: string;
   address: string;
   workingHours: string;
+  categoryImages: {
+    interior: string;
+    exterior: string;
+    materials: string;
+  };
 }
 
 export interface Product {

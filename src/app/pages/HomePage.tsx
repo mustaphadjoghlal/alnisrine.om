@@ -4,8 +4,8 @@ import { ChevronRight, Star, Package, Shield, TrendingUp } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
 import type { Product } from "../types";
-import { CAT_LABELS, CAT_IMAGES } from "../constants";
-import { subscribeToProducts } from "../../lib/firestore";
+import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
+import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 
 export function HomePage() {
   const { addToCart } = useOutletContext<{
@@ -13,9 +13,17 @@ export function HomePage() {
   }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [catImages, setCatImages] = useState(INIT_SITE_INFO.categoryImages);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteInfo((info) => {
+      if (info.categoryImages) setCatImages(info.categoryImages);
+    });
     return unsub;
   }, []);
 
@@ -54,7 +62,7 @@ export function HomePage() {
             </div>
             <div className="hidden lg:block">
               <div className="grid grid-cols-2 gap-4">
-                {Object.entries(CAT_IMAGES).map(([key, img]) => (
+                {Object.entries(catImages).map(([key, img]) => (
                   <img
                     key={key}
                     src={img}
@@ -149,7 +157,7 @@ export function HomePage() {
                 >
                   <div className="aspect-[4/3] relative">
                     <img
-                      src={CAT_IMAGES[cat]}
+                      src={catImages[cat]}
                       alt={CAT_LABELS[cat]}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />

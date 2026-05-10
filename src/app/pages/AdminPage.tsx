@@ -41,7 +41,7 @@ export function AdminPage() {
   const [siteInfoSaved, setSiteInfoSaved] = useState(false);
   const [savingSiteInfo, setSavingSiteInfo] = useState(false);
   const [uploadingCat, setUploadingCat] = useState<string | null>(null);
-
+  // Track Firebase auth state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       setLoggedIn(!!user);
@@ -50,12 +50,14 @@ export function AdminPage() {
     return unsub;
   }, []);
 
+  // Subscribe to products from Firestore when logged in
   useEffect(() => {
     if (!loggedIn) return;
     const unsub = subscribeToProducts(setProducts);
     return unsub;
   }, [loggedIn]);
 
+  // Subscribe to site info from Firestore when logged in
   useEffect(() => {
     if (!loggedIn) return;
     const unsub = subscribeToSiteInfo(setSiteInfo);
