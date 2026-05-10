@@ -1,4 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
+import { initTheme } from "./hooks/useTheme";
+
+initTheme();
 import { Layout } from "./shared/Layout";
 import { HomePage } from "./pages/HomePage";
 import { CategoryPage } from "./pages/CategoryPage";
