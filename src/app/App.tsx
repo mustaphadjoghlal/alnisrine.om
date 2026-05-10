@@ -8,6 +8,7 @@ import { ContactPage } from "./pages/ContactPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { AccountantPage } from "./pages/AccountantPage";
+import { OurColorsPage } from "./pages/OurColorsPage";
 import { initTheme, applyTheme, DEFAULT_THEME } from "./hooks/useTheme";
 import { subscribeToThemeColors } from "../lib/firestore";
 
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: "materials", Component: CategoryPage },
       { path: "about", Component: AboutPage },
       { path: "contact", Component: ContactPage },
+      { path: "our-colors", Component: OurColorsPage },
       { path: "*", Component: NotFoundPage },
     ],
   },

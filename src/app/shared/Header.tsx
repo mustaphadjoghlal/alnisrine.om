@@ -28,6 +28,7 @@ export function Header({
     { path: "/interior", label: "أصباغ داخلية" },
     { path: "/exterior", label: "أصباغ خارجية" },
     { path: "/materials", label: "مواد بناء" },
+    { path: "/our-colors", label: "من ألواننا" },
     { path: "/about", label: "من نحن" },
     { path: "/contact", label: "اتصل بنا" },
   ];
