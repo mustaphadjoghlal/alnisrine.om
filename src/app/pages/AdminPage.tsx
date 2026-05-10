@@ -47,7 +47,7 @@ export function AdminPage() {
   const [uploadingCat, setUploadingCat] = useState<string | null>(null);
 
   const { colors: themeColors, save: saveTheme, reset: resetTheme } = useTheme();
-  const [draftColors, setDraftColors] = useState<ThemeColors>(themeColors);
+  const [draftColors, setDraftColors] = useState<ThemeColors>({ ...themeColors });
   const [themeSaved, setThemeSaved] = useState(false);
 
   const handleSaveTheme = () => {
@@ -455,32 +455,32 @@ export function AdminPage() {
         {tab === "theme" && (
           <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black text-foreground">تخصيص الألوان</h2>
+              <div>
+                <h2 className="text-2xl font-black text-foreground">تخصيص الألوان</h2>
+                <p className="text-sm text-muted-foreground mt-1">سيتغير لون الموقع كله فور الحفظ</p>
+              </div>
               {themeSaved && (
                 <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">✓ تم الحفظ</span>
               )}
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {([
-                { key: "primary", label: "اللون الأساسي", desc: "الأزرار والروابط والعناصر الرئيسية" },
-                { key: "accent", label: "لون التمييز", desc: "الأزرار الثانوية والعناصر البارزة" },
-                { key: "secondary", label: "لون الخلفية الثانوية", desc: "خلفية الأقسام والبطاقات" },
-                { key: "background", label: "لون الخلفية الرئيسية", desc: "خلفية الصفحة والنوافذ" },
-                { key: "foreground", label: "لون النص", desc: "لون النصوص الرئيسية" },
-              ] as { key: keyof ThemeColors; label: string; desc: string }[]).map(({ key, label, desc }) => (
-                <div key={key} className="flex items-center gap-4">
-                  <div className="relative">
-                    <input
-                      type="color"
-                      value={draftColors[key]}
-                      onChange={(e) => setDraftColors((prev) => ({ ...prev, [key]: e.target.value }))}
-                      className="w-14 h-14 rounded-xl border border-border cursor-pointer p-1 bg-white"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm">{label}</span>
+                { key: "brandColor" as const, label: "لون الموقع الرئيسي", desc: "يغيّر لون الهيدر، الأزرار، الروابط، والخلفيات الزرقاء دفعة واحدة" },
+                { key: "accent" as const, label: "لون التمييز", desc: "لون أزرار واتساب والعناصر الثانوية" },
+                { key: "background" as const, label: "لون الخلفية", desc: "خلفية الصفحة الرئيسية" },
+                { key: "foreground" as const, label: "لون النصوص", desc: "لون النصوص الرئيسية في الموقع" },
+              ]).map(({ key, label, desc }) => (
+                <div key={key} className="flex items-center gap-4 p-3 rounded-xl border border-border hover:bg-secondary/30 transition-colors">
+                  <input
+                    type="color"
+                    value={draftColors[key]}
+                    onChange={(e) => setDraftColors((prev) => ({ ...prev, [key]: e.target.value }))}
+                    className="w-14 h-14 rounded-xl border-2 border-border cursor-pointer p-0.5 bg-white flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="font-bold text-sm">{label}</span>
                       <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded-full text-muted-foreground">{draftColors[key]}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">{desc}</p>
@@ -494,56 +494,47 @@ export function AdminPage() {
                     }}
                     maxLength={7}
                     dir="ltr"
-                    className="w-24 border border-border rounded-lg px-2 py-1.5 text-sm font-mono text-center focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                    className="w-24 border border-border rounded-lg px-2 py-1.5 text-sm font-mono text-center focus:outline-none focus:ring-2 focus:ring-blue-600/30 flex-shrink-0"
                   />
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 bg-secondary/40 rounded-xl p-4">
-              <p className="text-xs font-bold text-muted-foreground mb-3 uppercase">معاينة</p>
-              <div className="flex flex-wrap gap-2">
-                <div
-                  className="px-4 py-2 rounded-lg text-sm font-bold text-white"
-                  style={{ backgroundColor: draftColors.primary }}
-                >
-                  زر أساسي
+            <div className="mt-5 rounded-xl overflow-hidden border border-border">
+              <div
+                className="p-4 text-white text-sm font-bold"
+                style={{ background: `linear-gradient(to right, ${draftColors.brandColor}, ${draftColors.brandColor}cc)` }}
+              >
+                معاينة — هكذا سيبدو الهيدر
+              </div>
+              <div className="p-4 flex flex-wrap gap-2" style={{ backgroundColor: draftColors.background }}>
+                <div className="px-4 py-2 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: draftColors.brandColor }}>
+                  تسوق الآن
                 </div>
-                <div
-                  className="px-4 py-2 rounded-lg text-sm font-bold text-white"
-                  style={{ backgroundColor: draftColors.accent }}
-                >
-                  زر تمييز
+                <div className="px-4 py-2 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: draftColors.accent }}>
+                  واتساب
                 </div>
-                <div
-                  className="px-4 py-2 rounded-lg text-sm font-bold border"
-                  style={{ backgroundColor: draftColors.secondary, color: draftColors.foreground }}
-                >
-                  خلفية ثانوية
-                </div>
-                <div
-                  className="px-4 py-2 rounded-lg text-sm font-bold border"
-                  style={{ backgroundColor: draftColors.background, color: draftColors.foreground }}
-                >
-                  النص الأساسي
+                <div className="px-4 py-2 rounded-lg text-sm font-semibold border" style={{ color: draftColors.foreground, borderColor: draftColors.brandColor + "40" }}>
+                  <span style={{ color: draftColors.brandColor }}>جودة عالمية</span> ← نص ملوّن
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-5">
               <button
                 onClick={handleSaveTheme}
-                className="flex-1 bg-blue-700 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                style={{ backgroundColor: draftColors.brandColor }}
               >
                 <Save size={18} />
-                حفظ الألوان
+                حفظ وتطبيق على الموقع
               </button>
               <button
                 onClick={handleResetTheme}
                 className="px-4 py-3 border border-border rounded-xl font-semibold text-sm text-muted-foreground hover:bg-secondary transition-colors flex items-center gap-2"
               >
                 <RotateCcw size={16} />
-                استعادة الافتراضي
+                إعادة تعيين
               </button>
             </div>
           </div>
