@@ -4,8 +4,8 @@ import { Search, Filter } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
 import type { Product, Category } from "../types";
-import { CAT_LABELS, CAT_DESC, CAT_IMAGES } from "../constants";
-import { subscribeToProducts } from "../../lib/firestore";
+import { CAT_LABELS, CAT_DESC, INIT_SITE_INFO } from "../constants";
+import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 
 export function CategoryPage() {
   const location = useLocation();
@@ -18,9 +18,17 @@ export function CategoryPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
   const [showInStock, setShowInStock] = useState(false);
+  const [catImages, setCatImages] = useState(INIT_SITE_INFO.categoryImages);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteInfo((info) => {
+      if (info.categoryImages) setCatImages(info.categoryImages);
+    });
     return unsub;
   }, []);
 
@@ -47,11 +55,11 @@ export function CategoryPage() {
     <div className="min-h-screen">
       <section
         className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white py-16 px-4"
-        style={{
-          backgroundImage: `linear-gradient(rgba(29, 78, 216, 0.9), rgba(30, 64, 175, 0.9)), url(${CAT_IMAGES[category]})`,
+        style={catImages[category] ? {
+          backgroundImage: `linear-gradient(rgba(29, 78, 216, 0.9), rgba(30, 64, 175, 0.9)), url(${catImages[category]})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-        }}
+        } : undefined}
       >
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-black mb-4">

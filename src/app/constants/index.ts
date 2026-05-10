@@ -13,14 +13,6 @@ export const CAT_DESC: Record<Category, string> = {
   materials: "أدوات ومواد بناء متنوعة",
 };
 
-export const CAT_IMAGES: Record<Category, string> = {
-  interior:
-    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format",
-  exterior:
-    "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop&auto=format",
-  materials:
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop&auto=format",
-};
 
 export const ADMIN_PASS = "nasreen2024";
 export const WHATSAPP_NUMBER = "96891234567";
