@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useOutletContext } from "react-router";
+import { useLocation, useOutletContext } from "react-router";
 import { Search, Filter } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
@@ -8,7 +8,8 @@ import { CAT_LABELS, CAT_DESC, CAT_IMAGES } from "../constants";
 import { subscribeToProducts } from "../../lib/firestore";
 
 export function CategoryPage() {
-  const { category } = useParams<{ category: Category }>();
+  const location = useLocation();
+  const category = location.pathname.replace("/", "") as Category;
   const { addToCart } = useOutletContext<{
     addToCart: (p: Product) => void;
   }>();
