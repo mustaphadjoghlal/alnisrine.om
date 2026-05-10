@@ -62,13 +62,15 @@ export function HomePage() {
             </div>
             <div className="hidden lg:block">
               <div className="grid grid-cols-2 gap-4">
-                {Object.entries(catImages).map(([key, img]) => (
+                {Object.entries(catImages).map(([key, img]) => img ? (
                   <img
                     key={key}
                     src={img}
                     alt={CAT_LABELS[key as keyof typeof CAT_LABELS]}
                     className="rounded-2xl shadow-2xl h-48 w-full object-cover hover:scale-105 transition-transform duration-300"
                   />
+                ) : (
+                  <div key={key} className="rounded-2xl shadow-2xl h-48 w-full bg-blue-600/30" />
                 ))}
               </div>
             </div>
@@ -155,12 +157,14 @@ export function HomePage() {
                   to={`/${cat}`}
                   className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="aspect-[4/3] relative">
-                    <img
-                      src={catImages[cat]}
-                      alt={CAT_LABELS[cat]}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                  <div className="aspect-[4/3] relative bg-blue-800">
+                    {catImages[cat] && (
+                      <img
+                        src={catImages[cat]}
+                        alt={CAT_LABELS[cat]}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">

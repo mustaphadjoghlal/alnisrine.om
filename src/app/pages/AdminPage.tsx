@@ -382,11 +382,17 @@ export function AdminPage() {
                     const labels = { interior: "أصباغ داخلية", exterior: "أصباغ خارجية", materials: "مواد بناء" };
                     return (
                       <div key={cat} className="border border-border rounded-lg overflow-hidden">
-                        <img
-                          src={siteInfo.categoryImages?.[cat]}
-                          alt={labels[cat]}
-                          className="w-full h-32 object-cover"
-                        />
+                        {siteInfo.categoryImages?.[cat] ? (
+                          <img
+                            src={siteInfo.categoryImages[cat]}
+                            alt={labels[cat]}
+                            className="w-full h-32 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-32 bg-blue-50 flex items-center justify-center text-xs text-muted-foreground">
+                            لا توجد صورة
+                          </div>
+                        )}
                         <div className="p-2">
                           <p className="text-xs font-semibold text-center mb-2">{labels[cat]}</p>
                           <label className="flex items-center justify-center gap-1 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-1.5 rounded-lg transition-colors">
