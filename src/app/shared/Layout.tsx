@@ -4,11 +4,20 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { CartDrawer } from "../components/CartDrawer";
 import type { CartItem, Product } from "../types";
-import { WHATSAPP_NUMBER } from "../constants";
+import { INIT_SITE_INFO } from "../constants";
+import { subscribeToSiteInfo } from "../../lib/firestore";
 
 export function Layout() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [whatsapp, setWhatsapp] = useState(INIT_SITE_INFO.whatsappNumber);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteInfo((info) => {
+      if (info.whatsappNumber) setWhatsapp(info.whatsappNumber);
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("cart");
@@ -61,7 +70,7 @@ export function Layout() {
     const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
     const msg = `مرحباً، أرغب في إتمام الطلب التالي:\n\n${items}\n\n*الإجمالي:* ${total.toFixed(3)} ر.ع`;
     window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`,
       "_blank"
     );
   };
