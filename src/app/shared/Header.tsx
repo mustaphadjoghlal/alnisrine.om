@@ -95,11 +95,11 @@ export function Header({
             <div className="flex items-center gap-3">
               <button
                 onClick={onCartOpen}
-                className="relative p-2 hover:bg-secondary rounded-lg transition-colors"
+                className={`relative p-2 rounded-lg transition-all ${cartCount > 0 ? "bg-blue-600 text-white shadow-md hover:bg-blue-700" : "hover:bg-secondary text-foreground"}`}
               >
-                <ShoppingCart size={20} className="text-foreground" />
+                <ShoppingCart size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -end-1 bg-blue-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -end-1.5 bg-white text-blue-700 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center shadow">
                     {cartCount}
                   </span>
                 )}

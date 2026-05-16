@@ -110,6 +110,9 @@ export interface InventoryAlert {
   lastAlertDate: string;
 }
 
+// ─── Branch ───────────────────────────────────────────────────────────────────
+export interface Branch { id: string; ar: string; en: string; }
+
 // ─── Accountant / Finance ──────────────────────────────────────────────────────
 export interface SaleItem {
   name: string;

@@ -15,6 +15,7 @@ export function CraftsmanRequest() {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [waUrl, setWaUrl] = useState("");
 
   useEffect(() => {
     const unsub = subscribeToSiteInfo((info) => {
@@ -26,6 +27,18 @@ export function CraftsmanRequest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
+
+    const serviceLabel = serviceType === "painter" ? "صباغ" : (serviceDesc || "حرفي");
+    const waText = encodeURIComponent(
+      `🎨 *طلب ${serviceType === "painter" ? "صباغ" : "حرفي"} جديد — النسرين للأصباغ*\n\n` +
+      `👤 الاسم: ${name}\n` +
+      `📞 الهاتف: ${phone}\n` +
+      `🔧 الخدمة المطلوبة: ${serviceLabel}\n` +
+      `📍 الموقع: ${location}` +
+      (notes ? `\n📝 ملاحظات: ${notes}` : "")
+    );
+    const url = `https://api.whatsapp.com/send?phone=${whatsapp}&text=${waText}`;
+
     try {
       await addServiceRequest({
         name,
@@ -38,19 +51,10 @@ export function CraftsmanRequest() {
         status: "pending",
       });
 
-      const waText = encodeURIComponent(
-        `مرحباً، طلب ${serviceType === "painter" ? "صباغ" : "حرفي"} جديد:\n` +
-        `الاسم: ${name}\n` +
-        `الهاتف: ${phone}\n` +
-        `الخدمة: ${serviceDesc || (serviceType === "painter" ? "صباغ" : "حرفي")}\n` +
-        `الموقع: ${location}\n` +
-        (notes ? `ملاحظات: ${notes}` : "")
-      );
-      window.open(`https://api.whatsapp.com/send?phone=${whatsapp}&text=${waText}`, "_blank");
-
+      setWaUrl(url);
       setDone(true);
       setName(""); setPhone(""); setServiceDesc(""); setLocation(""); setNotes("");
-      setTimeout(() => setDone(false), 5000);
+      setTimeout(() => { setDone(false); setWaUrl(""); }, 30000);
     } finally {
       setSending(false);
     }
@@ -72,8 +76,19 @@ export function CraftsmanRequest() {
             {done ? (
               <div className="flex flex-col items-center justify-center py-8 text-center gap-4">
                 <CheckCircle size={48} className="text-green-500" />
-                <h3 className="text-xl font-black text-green-700">تم إرسال طلبك بنجاح!</h3>
-                <p className="text-muted-foreground text-sm">سنتواصل معك على رقم الهاتف المدخل في أقرب وقت.</p>
+                <h3 className="text-xl font-black text-green-700">تم تسجيل طلبك بنجاح!</h3>
+                <p className="text-muted-foreground text-sm">اضغط الزر أدناه لإرسال التفاصيل عبر واتساب وسنتواصل معك في أقرب وقت.</p>
+                {waUrl && (
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-2"
+                  >
+                    <WhatsAppSvg className="w-5 h-5" />
+                    أرسل التفاصيل عبر واتساب
+                  </a>
+                )}
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -164,8 +179,7 @@ export function CraftsmanRequest() {
                   className="w-full bg-amber-500 text-white font-bold py-3 rounded-xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   <Send size={16} />
-                  {sending ? "جارٍ الإرسال..." : "أرسل الطلب عبر واتساب"}
-                  <WhatsAppSvg className="w-4 h-4" />
+                  {sending ? "جارٍ الإرسال..." : "أرسل الطلب"}
                 </button>
               </form>
             )}

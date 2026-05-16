@@ -12,6 +12,7 @@ import {
   subscribeToBranchStocks, saveBranchStock,
   subscribeToAuditLog, addAuditEntry,
   subscribeToServiceRequests, updateServiceRequestStatus,
+  subscribeToBranches,
   nowISO,
 } from "../../lib/firestore";
 import { BRANCHES } from "../constants";
@@ -21,6 +22,7 @@ import type {
   BranchStock, InventoryItem,
   AuditEntry,
   ServiceRequest,
+  Branch,
 } from "../types";
 import logo from "../../imports/photo-1700901555562-952f0008a11f.jpeg_-_Copy.png";
 
@@ -138,8 +140,8 @@ const T = {
   },
 };
 
-function branchLabel(id: string, lang: Lang) {
-  const b = BRANCHES.find((x) => x.id === id);
+function branchLabel(id: string, lang: Lang, branches: Branch[]) {
+  const b = branches.find((x) => x.id === id);
   if (!b) return id;
   return lang === "ar" ? b.ar : b.en;
 }
@@ -177,6 +179,7 @@ export function AccountantPage() {
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
 
+  const [branches, setBranches] = useState<Branch[]>(BRANCHES as Branch[]);
   const [showSaleForm, setShowSaleForm] = useState(false);
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [editingStock, setEditingStock] = useState<string | null>(null);
@@ -187,6 +190,11 @@ export function AccountantPage() {
       setUserEmail(user?.email || "");
       setAuthLoading(false);
     });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToBranches((b) => { if (b.length > 0) setBranches(b); });
     return unsub;
   }, []);
 
@@ -344,7 +352,7 @@ export function AccountantPage() {
             </div>
 
             {showSaleForm && (
-              <SaleForm lang={lang} t={t} dir={dir}
+              <SaleForm lang={lang} t={t} dir={dir} branches={branches}
                 onSave={async (sale) => {
                   await addSale({ ...sale, createdBy: "accountant", createdByEmail: userEmail, createdAt: nowISO() });
                   await logAudit("add", "sale", `${sale.customerName} — ${sale.total.toFixed(3)} OMR`);
@@ -371,7 +379,7 @@ export function AccountantPage() {
                         <td className="p-2 whitespace-nowrap text-xs">{fmtDate(s.date)}</td>
                         <td className="p-2 font-semibold">{s.customerName}</td>
                         <td className="p-2 text-xs" dir="ltr">{s.customerPhone}</td>
-                        <td className="p-2 text-xs">{branchLabel(s.branch, lang)}</td>
+                        <td className="p-2 text-xs">{branchLabel(s.branch, lang, branches)}</td>
                         <td className="p-2 text-xs">{s.salesperson}</td>
                         <td className="p-2 font-bold text-blue-700">{s.total.toFixed(3)}</td>
                         <td className="p-2 text-xs text-muted-foreground">{s.notes}</td>
@@ -405,7 +413,7 @@ export function AccountantPage() {
             </div>
 
             {showPurchaseForm && (
-              <PurchaseForm lang={lang} t={t} dir={dir}
+              <PurchaseForm lang={lang} t={t} dir={dir} branches={branches}
                 onSave={async (purchase) => {
                   await addPurchase({ ...purchase, createdBy: "accountant", createdByEmail: userEmail, createdAt: nowISO() });
                   await logAudit("add", "purchase", `${purchase.supplier} — ${purchase.total.toFixed(3)} OMR`);
@@ -431,7 +439,7 @@ export function AccountantPage() {
                       <tr key={p.id} className="border-b border-border hover:bg-secondary/40">
                         <td className="p-2 whitespace-nowrap text-xs">{fmtDate(p.date)}</td>
                         <td className="p-2 font-semibold">{p.supplier}</td>
-                        <td className="p-2 text-xs">{branchLabel(p.branch, lang)}</td>
+                        <td className="p-2 text-xs">{branchLabel(p.branch, lang, branches)}</td>
                         <td className="p-2 font-bold text-orange-600">{p.total.toFixed(3)}</td>
                         <td className="p-2 text-xs text-muted-foreground">{p.notes}</td>
                         <td className="p-2">
@@ -455,7 +463,7 @@ export function AccountantPage() {
         {/* ── Inventory Tab ── */}
         {tab === "inventory" && (
           <div className="space-y-4">
-            {BRANCHES.map((branch) => {
+            {branches.map((branch) => {
               const stock = stocks.find((s) => s.branchId === branch.id);
               const isEditing = editingStock === branch.id;
               return (
@@ -559,15 +567,15 @@ export function AccountantPage() {
 }
 
 // ─── Sale Form ────────────────────────────────────────────────────────────────
-function SaleForm({ lang, t, dir, onSave, onCancel }: {
-  lang: Lang; t: typeof T["ar"]; dir: string;
+function SaleForm({ lang, t, dir, branches, onSave, onCancel }: {
+  lang: Lang; t: typeof T["ar"]; dir: string; branches: Branch[];
   onSave: (s: Omit<SaleRecord, "id" | "createdBy" | "createdByEmail" | "createdAt">) => void;
   onCancel: () => void;
 }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 16));
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [branch, setBranch] = useState(BRANCHES[0].id);
+  const [branch, setBranch] = useState(branches[0]?.id ?? "");
   const [salesperson, setSalesperson] = useState("");
   const [items, setItems] = useState<SaleItem[]>([{ ...EMPTY_SALE_ITEM }]);
   const [notes, setNotes] = useState("");
@@ -586,7 +594,7 @@ function SaleForm({ lang, t, dir, onSave, onCancel }: {
         <Field label={t.phone}><input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} dir="ltr" className={inputCls} /></Field>
         <Field label={t.branch}>
           <select value={branch} onChange={(e) => setBranch(e.target.value)} className={inputCls}>
-            {BRANCHES.map((b) => <option key={b.id} value={b.id}>{lang === "ar" ? b.ar : b.en}</option>)}
+            {branches.map((b) => <option key={b.id} value={b.id}>{lang === "ar" ? b.ar : b.en}</option>)}
           </select>
         </Field>
         <Field label={t.salesperson}><input value={salesperson} onChange={(e) => setSalesperson(e.target.value)} className={inputCls} /></Field>
@@ -619,14 +627,14 @@ function SaleForm({ lang, t, dir, onSave, onCancel }: {
 }
 
 // ─── Purchase Form ────────────────────────────────────────────────────────────
-function PurchaseForm({ lang, t, dir, onSave, onCancel }: {
-  lang: Lang; t: typeof T["ar"]; dir: string;
+function PurchaseForm({ lang, t, dir, branches, onSave, onCancel }: {
+  lang: Lang; t: typeof T["ar"]; dir: string; branches: Branch[];
   onSave: (p: Omit<PurchaseRecord, "id" | "createdBy" | "createdByEmail" | "createdAt">) => void;
   onCancel: () => void;
 }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 16));
   const [supplier, setSupplier] = useState("");
-  const [branch, setBranch] = useState(BRANCHES[0].id);
+  const [branch, setBranch] = useState(branches[0]?.id ?? "");
   const [items, setItems] = useState([{ name: "", qty: 1, unit: "علبة", cost: 0 }]);
   const [notes, setNotes] = useState("");
 
@@ -643,7 +651,7 @@ function PurchaseForm({ lang, t, dir, onSave, onCancel }: {
         <Field label={t.supplier}><input value={supplier} onChange={(e) => setSupplier(e.target.value)} className={inputCls} /></Field>
         <Field label={t.branch}>
           <select value={branch} onChange={(e) => setBranch(e.target.value)} className={inputCls}>
-            {BRANCHES.map((b) => <option key={b.id} value={b.id}>{lang === "ar" ? b.ar : b.en}</option>)}
+            {branches.map((b) => <option key={b.id} value={b.id}>{lang === "ar" ? b.ar : b.en}</option>)}
           </select>
         </Field>
         <Field label={t.notes}><input value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} /></Field>
@@ -676,7 +684,7 @@ function PurchaseForm({ lang, t, dir, onSave, onCancel }: {
 
 // ─── Branch Stock Card ────────────────────────────────────────────────────────
 function BranchStockCard({ branch, lang, t, stock, isEditing, onEdit, onSave }: {
-  branch: typeof BRANCHES[number]; lang: Lang; t: typeof T["ar"];
+  branch: Branch; lang: Lang; t: typeof T["ar"];
   stock?: BranchStock; isEditing: boolean;
   onEdit: () => void; onSave: (items: InventoryItem[]) => void;
 }) {

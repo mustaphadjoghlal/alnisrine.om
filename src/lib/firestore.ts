@@ -18,6 +18,7 @@ import type {
   PurchaseRecord,
   BranchStock,
   AuditEntry,
+  Branch,
 } from "../app/types";
 import { INIT_SITE_INFO } from "../app/constants";
 
@@ -136,4 +137,19 @@ export async function addAuditEntry(entry: Omit<AuditEntry, "id">): Promise<void
 
 export function nowISO(): string {
   return new Date().toISOString();
+}
+
+// ─── Branches Config ──────────────────────────────────────────────────────────
+export function subscribeToBranches(callback: (branches: Branch[]) => void) {
+  return onSnapshot(doc(db, "config", "branches"), (snap) => {
+    if (snap.exists()) {
+      callback(snap.data().list as Branch[]);
+    } else {
+      callback([]);
+    }
+  });
+}
+
+export async function saveBranches(branches: Branch[]): Promise<void> {
+  await setDoc(doc(db, "config", "branches"), { list: branches });
 }

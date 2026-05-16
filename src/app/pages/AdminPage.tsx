@@ -14,19 +14,21 @@ import {
   Loader2,
   Palette,
   RotateCcw,
+  Building2,
+  X,
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors } from "../../lib/firestore";
+import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors, subscribeToBranches, saveBranches } from "../../lib/firestore";
 import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
-import type { Product, SiteInfo } from "../types";
-import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
+import type { Product, SiteInfo, Branch } from "../types";
+import { CAT_LABELS, INIT_SITE_INFO, BRANCHES } from "../constants";
 import { useTheme, DEFAULT_THEME } from "../hooks/useTheme";
 import type { ThemeColors } from "../hooks/useTheme";
 import logo from "../../imports/photo-1700901555562-952f0008a11f.jpeg_-_Copy.png";
 
-type Tab = "products" | "siteinfo" | "theme";
+type Tab = "products" | "siteinfo" | "theme" | "branches";
 
 export function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -45,6 +47,13 @@ export function AdminPage() {
   const [siteInfoSaved, setSiteInfoSaved] = useState(false);
   const [savingSiteInfo, setSavingSiteInfo] = useState(false);
   const [uploadingCat, setUploadingCat] = useState<string | null>(null);
+
+  const [branches, setBranches] = useState<Branch[]>(BRANCHES as Branch[]);
+  const [branchesSaved, setBranchesSaved] = useState(false);
+  const [savingBranches, setSavingBranches] = useState(false);
+  const [newBranchAr, setNewBranchAr] = useState("");
+  const [newBranchEn, setNewBranchEn] = useState("");
+  const [editingBranchIdx, setEditingBranchIdx] = useState<number | null>(null);
 
   const { colors: themeColors, save: saveTheme, reset: resetTheme } = useTheme();
   const [draftColors, setDraftColors] = useState<ThemeColors>({ ...themeColors });
@@ -84,6 +93,13 @@ export function AdminPage() {
   useEffect(() => {
     if (!loggedIn) return;
     const unsub = subscribeToSiteInfo(setSiteInfo);
+    return unsub;
+  }, [loggedIn]);
+
+  // Subscribe to branches from Firestore when logged in
+  useEffect(() => {
+    if (!loggedIn) return;
+    const unsub = subscribeToBranches((b) => { if (b.length > 0) setBranches(b); });
     return unsub;
   }, [loggedIn]);
 
@@ -257,6 +273,13 @@ export function AdminPage() {
             >
               <Palette size={16} />
               الألوان
+            </button>
+            <button
+              onClick={() => setTab("branches")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${tab === "branches" ? "bg-white text-blue-700" : "bg-white/10 text-white hover:bg-white/20"}`}
+            >
+              <Building2 size={16} />
+              الفروع
             </button>
           </div>
         </div>
@@ -538,6 +561,108 @@ export function AdminPage() {
                 إعادة تعيين
               </button>
             </div>
+          </div>
+        )}
+
+        {tab === "branches" && (
+          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-black text-foreground">إدارة الفروع</h2>
+                <p className="text-sm text-muted-foreground mt-1">يُستخدم في واجهة المحاسب لتحديد الفرع</p>
+              </div>
+              {branchesSaved && (
+                <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">✓ تم الحفظ</span>
+              )}
+            </div>
+
+            <div className="space-y-2 mb-6">
+              {branches.map((b, idx) => (
+                <div key={b.id} className="flex items-center gap-3 p-3 border border-border rounded-xl bg-secondary/30">
+                  {editingBranchIdx === idx ? (
+                    <>
+                      <input
+                        value={b.ar}
+                        onChange={(e) => setBranches((prev) => prev.map((x, i) => i === idx ? { ...x, ar: e.target.value } : x))}
+                        placeholder="الاسم بالعربية"
+                        className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                      />
+                      <input
+                        value={b.en}
+                        onChange={(e) => setBranches((prev) => prev.map((x, i) => i === idx ? { ...x, en: e.target.value } : x))}
+                        placeholder="English name"
+                        dir="ltr"
+                        className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                      />
+                      <button onClick={() => setEditingBranchIdx(null)} className="text-blue-700 font-bold text-sm px-2">حفظ</button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{b.ar}</p>
+                        <p className="text-xs text-muted-foreground">{b.en}</p>
+                      </div>
+                      <button onClick={() => setEditingBranchIdx(idx)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => setBranches((prev) => prev.filter((_, i) => i !== idx))}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="border border-dashed border-border rounded-xl p-4 mb-5">
+              <p className="text-xs font-semibold text-muted-foreground mb-3">إضافة فرع جديد</p>
+              <div className="flex gap-2">
+                <input
+                  value={newBranchAr}
+                  onChange={(e) => setNewBranchAr(e.target.value)}
+                  placeholder="الاسم بالعربية"
+                  className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                />
+                <input
+                  value={newBranchEn}
+                  onChange={(e) => setNewBranchEn(e.target.value)}
+                  placeholder="English name"
+                  dir="ltr"
+                  className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                />
+                <button
+                  onClick={() => {
+                    if (!newBranchAr.trim()) return;
+                    const id = Date.now().toString();
+                    setBranches((prev) => [...prev, { id, ar: newBranchAr.trim(), en: newBranchEn.trim() || newBranchAr.trim() }]);
+                    setNewBranchAr(""); setNewBranchEn("");
+                  }}
+                  className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-800 transition-colors flex items-center gap-1"
+                >
+                  <PlusCircle size={14} />
+                  إضافة
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={async () => {
+                setSavingBranches(true);
+                await saveBranches(branches);
+                setSavingBranches(false);
+                setBranchesSaved(true);
+                setEditingBranchIdx(null);
+                setTimeout(() => setBranchesSaved(false), 2500);
+              }}
+              disabled={savingBranches}
+              className="w-full bg-blue-700 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {savingBranches ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              حفظ قائمة الفروع
+            </button>
           </div>
         )}
       </div>
