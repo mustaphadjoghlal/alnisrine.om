@@ -1,13 +1,34 @@
 // ============================================================
 // سكريبت إضافة منتجات الدهان الخارجي — جوتن
-// الاستخدام: افتح موقعك في المتصفح، افتح DevTools (F12)
-//            اذهب إلى Console، الصق هذا الكود واضغط Enter
+// الاستخدام: افتح /admin وسجّل دخولك، ثم افتح Console والصق هذا الكود
 // ============================================================
 
 (async () => {
   const PROJECT = "alnisrineom";
-  const API_KEY = "AIzaSyB8gqNqLz_cXnzMVt5D37bYEkjmOw9PEL8";
   const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
+
+  // ── استخراج رمز المصادقة من IndexedDB (Firebase يحفظه هناك تلقائياً) ──
+  async function getAuthToken() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open("firebaseLocalStorageDb");
+      req.onerror = () => reject("فشل فتح IndexedDB");
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction("firebaseLocalStorage", "readonly");
+        const store = tx.objectStore("firebaseLocalStorage");
+        const all = store.getAll();
+        all.onsuccess = () => {
+          const entry = all.result.find(r =>
+            r.fbase_key && r.fbase_key.includes("firebase:authUser")
+          );
+          if (!entry) return reject("❌ غير مسجّل الدخول. افتح /admin وسجّل دخولك أولاً.");
+          const token = entry.value?.stsTokenManager?.accessToken;
+          if (!token) return reject("❌ لم يُعثر على رمز المصادقة.");
+          resolve(token);
+        };
+      };
+    });
+  }
 
   const products = [
     {
@@ -132,62 +153,69 @@
     },
   ];
 
-  // تحويل المنتج إلى صيغة Firestore
-  function toFirestore(product) {
-    const id = `ext_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  function toFirestoreFields(product, id) {
     return {
-      name: product.id || id,
-      fields: {
-        id:          { stringValue: id },
-        name:        { stringValue: product.name },
-        description: { stringValue: product.description },
-        price:       { doubleValue: product.price },
-        image:       { stringValue: product.image },
-        category:    { stringValue: product.category },
-        subcategory: { stringValue: product.subcategory },
-        inStock:     { booleanValue: product.inStock },
-        featured:    { booleanValue: product.featured },
-        rating:      { doubleValue: product.rating },
-        reviews:     { integerValue: product.reviews },
-        unit:        { stringValue: product.unit },
-        sizes:       {
-          arrayValue: {
-            values: product.sizes.map(s => ({
-              mapValue: {
-                fields: {
-                  label: { stringValue: s.label },
-                  price: { doubleValue: s.price },
-                }
+      id:          { stringValue: id },
+      name:        { stringValue: product.name },
+      description: { stringValue: product.description },
+      price:       { doubleValue: product.price },
+      image:       { stringValue: product.image },
+      category:    { stringValue: product.category },
+      subcategory: { stringValue: product.subcategory },
+      inStock:     { booleanValue: product.inStock },
+      featured:    { booleanValue: product.featured },
+      rating:      { doubleValue: product.rating },
+      reviews:     { integerValue: product.reviews },
+      unit:        { stringValue: product.unit },
+      sizes: {
+        arrayValue: {
+          values: product.sizes.map(s => ({
+            mapValue: {
+              fields: {
+                label: { stringValue: s.label },
+                price: { doubleValue: s.price },
               }
-            }))
-          }
+            }
+          }))
         }
-      },
-      _id: id,
+      }
     };
   }
 
-  console.log(`🚀 بدء إضافة ${products.length} منتج خارجي من جوتن...`);
+  // ── الحصول على رمز المصادقة ──
+  let token;
+  try {
+    token = await getAuthToken();
+    console.log("🔑 تم استخراج رمز المصادقة بنجاح.");
+  } catch (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log(`\n🚀 بدء إضافة ${products.length} منتج خارجي من جوتن...\n`);
   let success = 0;
 
   for (const product of products) {
-    const data = toFirestore(product);
-    const url = `${BASE}/products/${data._id}?key=${API_KEY}`;
+    const id = `ext_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const url = `${BASE}/products/${id}`;
     const res = await fetch(url, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: data.fields }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ fields: toFirestoreFields(product, id) }),
     });
     if (res.ok) {
       success++;
       console.log(`✅ (${success}/${products.length}) ${product.name}`);
     } else {
       const err = await res.json();
-      console.error(`❌ فشل: ${product.name}`, err.error?.message);
+      console.error(`❌ فشل: ${product.name} —`, err.error?.message);
     }
     await new Promise(r => setTimeout(r, 300));
   }
 
   console.log(`\n🎉 تمت إضافة ${success} من ${products.length} منتج بنجاح!`);
-  console.log("🔄 أعد تحميل الصفحة لرؤية المنتجات.");
+  if (success > 0) console.log("🔄 أعد تحميل الصفحة لرؤية المنتجات.");
 })();
