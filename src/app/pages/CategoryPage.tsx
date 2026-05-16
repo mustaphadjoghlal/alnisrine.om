@@ -10,8 +10,10 @@ import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 export function CategoryPage() {
   const location = useLocation();
   const category = location.pathname.replace("/", "") as Category;
-  const { addToCart } = useOutletContext<{
+  const { addToCart, cart, updateCart } = useOutletContext<{
     addToCart: (p: Product) => void;
+    cart: import("../types").CartItem[];
+    updateCart: (id: string, qty: number) => void;
   }>();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,7 +115,9 @@ export function CategoryPage() {
                 <ProductCard
                   key={p.id}
                   product={p}
+                  cartQty={cart.find(i => i.product.id === p.id)?.quantity ?? 0}
                   onAdd={addToCart}
+                  onUpdate={updateCart}
                   onView={setSelectedProduct}
                 />
               ))}

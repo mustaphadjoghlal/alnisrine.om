@@ -1,18 +1,23 @@
-import { Plus, Eye } from "lucide-react";
+import { Plus, Minus, Eye, ShoppingCart } from "lucide-react";
 import type { Product } from "../types";
 import { StarRating } from "./StarRating";
 
 export function ProductCard({
   product,
+  cartQty = 0,
   onAdd,
+  onUpdate,
   onView,
 }: {
   product: Product;
+  cartQty?: number;
   onAdd: (p: Product) => void;
+  onUpdate?: (id: string, qty: number) => void;
   onView: (p: Product) => void;
 }) {
   const displayPrice = product.sizes.length > 0 ? product.sizes[0].price : product.price;
   const hasMoreSizes = product.sizes.length > 1;
+  const inCart = cartQty > 0;
 
   return (
     <div className="bg-white border border-border rounded-xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
@@ -33,6 +38,11 @@ export function ProductCard({
               نفد المخزون
             </span>
           </div>
+        )}
+        {inCart && (
+          <span className="absolute top-2 start-2 bg-green-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow">
+            {cartQty}
+          </span>
         )}
         <button
           onClick={() => onView(product)}
@@ -55,7 +65,7 @@ export function ProductCard({
         </div>
         <h3 className="font-bold text-foreground text-sm mb-1">{product.name}</h3>
         <StarRating rating={product.rating} reviews={product.reviews} />
-<div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
           <div className="flex items-baseline gap-1">
             {hasMoreSizes && (
               <span className="text-[10px] text-muted-foreground">يبدأ من</span>
@@ -65,14 +75,35 @@ export function ProductCard({
             </span>
             <span className="text-xs text-muted-foreground">ر.ع</span>
           </div>
-          <button
-            onClick={() => onAdd(product)}
-            disabled={!product.inStock}
-            className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
-          >
-            <Plus size={12} />
-            أضف للسلة
-          </button>
+
+          {inCart ? (
+            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => onUpdate?.(product.id, cartQty - 1)}
+                className="px-2 py-1.5 text-green-700 hover:bg-green-100 transition-colors"
+              >
+                <Minus size={12} />
+              </button>
+              <span className="px-1 text-sm font-black text-green-700 min-w-[1.25rem] text-center">
+                {cartQty}
+              </span>
+              <button
+                onClick={() => onAdd(product)}
+                className="px-2 py-1.5 text-green-700 hover:bg-green-100 transition-colors"
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onAdd(product)}
+              disabled={!product.inStock}
+              className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              <ShoppingCart size={12} />
+              أضف للسلة
+            </button>
+          )}
         </div>
       </div>
     </div>

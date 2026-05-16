@@ -10,8 +10,10 @@ import { CAT_LABELS, INIT_SITE_INFO } from "../constants";
 import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 
 export function HomePage() {
-  const { addToCart } = useOutletContext<{
+  const { addToCart, cart, updateCart } = useOutletContext<{
     addToCart: (p: Product) => void;
+    cart: import("../types").CartItem[];
+    updateCart: (id: string, qty: number) => void;
   }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -140,7 +142,9 @@ export function HomePage() {
               <ProductCard
                 key={p.id}
                 product={p}
+                cartQty={cart.find(i => i.product.id === p.id)?.quantity ?? 0}
                 onAdd={addToCart}
+                onUpdate={updateCart}
                 onView={setSelectedProduct}
               />
             ))}

@@ -76,7 +76,7 @@ export function Layout() {
     <div className="min-h-screen flex flex-col" dir="rtl">
       <Header cartCount={cart.length} onCartOpen={() => setCartOpen(true)} />
       <main className="flex-1">
-        <Outlet context={{ addToCart }} />
+        <Outlet context={{ addToCart, cart, updateCart }} />
       </main>
       <Footer />
       {cartOpen && (
