@@ -16,10 +16,12 @@ import {
   RotateCcw,
   Building2,
   X,
+  Download,
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors, subscribeToBranches, saveBranches } from "../../lib/firestore";
+import { seedExteriorProducts } from "../../lib/seedExterior";
 import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo, Branch } from "../types";
@@ -54,6 +56,9 @@ export function AdminPage() {
   const [newBranchAr, setNewBranchAr] = useState("");
   const [newBranchEn, setNewBranchEn] = useState("");
   const [editingBranchIdx, setEditingBranchIdx] = useState<number | null>(null);
+
+  const [seeding, setSeeding] = useState(false);
+  const [seedDone, setSeedDone] = useState(false);
 
   const { colors: themeColors, save: saveTheme, reset: resetTheme } = useTheme();
   const [draftColors, setDraftColors] = useState<ThemeColors>({ ...themeColors });
@@ -312,13 +317,33 @@ export function AdminPage() {
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-foreground">إدارة المنتجات</h2>
-                <button
-                  onClick={() => { setEditingProduct(null); setShowForm(true); }}
-                  className="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2"
-                >
-                  <PlusCircle size={18} />
-                  إضافة منتج جديد
-                </button>
+                <div className="flex items-center gap-2">
+                  {seedDone && (
+                    <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">✓ تمت الإضافة</span>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm("سيتم إضافة 15 منتج خارجي من جوتن. هل تريد المتابعة؟")) return;
+                      setSeeding(true);
+                      await seedExteriorProducts();
+                      setSeeding(false);
+                      setSeedDone(true);
+                      setTimeout(() => setSeedDone(false), 5000);
+                    }}
+                    disabled={seeding}
+                    className="bg-amber-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 disabled:opacity-60 text-sm"
+                  >
+                    {seeding ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                    {seeding ? "جارٍ الاستيراد..." : "استيراد منتجات جوتن"}
+                  </button>
+                  <button
+                    onClick={() => { setEditingProduct(null); setShowForm(true); }}
+                    className="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2"
+                  >
+                    <PlusCircle size={18} />
+                    إضافة منتج جديد
+                  </button>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
