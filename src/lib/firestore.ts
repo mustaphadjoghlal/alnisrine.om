@@ -139,9 +139,9 @@ export function nowISO(): string {
   return new Date().toISOString();
 }
 
-// ─── Branches Config ──────────────────────────────────────────────────────────
+// ─── Branches Config (stored in siteConfig/branches — same collection as theme/info) ──
 export function subscribeToBranches(callback: (branches: Branch[]) => void) {
-  return onSnapshot(doc(db, "config", "branches"), (snap) => {
+  return onSnapshot(doc(db, "siteConfig", "branches"), (snap) => {
     if (snap.exists()) {
       callback(snap.data().list as Branch[]);
     } else {
@@ -151,5 +151,5 @@ export function subscribeToBranches(callback: (branches: Branch[]) => void) {
 }
 
 export async function saveBranches(branches: Branch[]): Promise<void> {
-  await setDoc(doc(db, "config", "branches"), { list: branches });
+  await setDoc(doc(db, "siteConfig", "branches"), { list: branches });
 }

@@ -15,7 +15,6 @@ export function CraftsmanRequest() {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
-  const [waUrl, setWaUrl] = useState("");
 
   useEffect(() => {
     const unsub = subscribeToSiteInfo((info) => {
@@ -39,6 +38,9 @@ export function CraftsmanRequest() {
     );
     const url = `https://api.whatsapp.com/send?phone=${whatsapp}&text=${waText}`;
 
+    // فتح واتساب قبل أي await حتى لا يحجبه المتصفح
+    window.open(url, "_blank");
+
     try {
       await addServiceRequest({
         name,
@@ -51,10 +53,9 @@ export function CraftsmanRequest() {
         status: "pending",
       });
 
-      setWaUrl(url);
       setDone(true);
       setName(""); setPhone(""); setServiceDesc(""); setLocation(""); setNotes("");
-      setTimeout(() => { setDone(false); setWaUrl(""); }, 30000);
+      setTimeout(() => setDone(false), 8000);
     } finally {
       setSending(false);
     }
@@ -76,19 +77,8 @@ export function CraftsmanRequest() {
             {done ? (
               <div className="flex flex-col items-center justify-center py-8 text-center gap-4">
                 <CheckCircle size={48} className="text-green-500" />
-                <h3 className="text-xl font-black text-green-700">تم تسجيل طلبك بنجاح!</h3>
-                <p className="text-muted-foreground text-sm">اضغط الزر أدناه لإرسال التفاصيل عبر واتساب وسنتواصل معك في أقرب وقت.</p>
-                {waUrl && (
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-2"
-                  >
-                    <WhatsAppSvg className="w-5 h-5" />
-                    أرسل التفاصيل عبر واتساب
-                  </a>
-                )}
+                <h3 className="text-xl font-black text-green-700">تم إرسال طلبك بنجاح!</h3>
+                <p className="text-muted-foreground text-sm">فُتحت نافذة واتساب لإرسال التفاصيل. سنتواصل معك في أقرب وقت.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
