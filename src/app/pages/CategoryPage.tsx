@@ -7,11 +7,13 @@ import type { Product, Category } from "../types";
 import { CAT_LABELS, CAT_DESC, INIT_SITE_INFO } from "../constants";
 import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 
+const normalize = (s: string) => s.replace(/[ؐ-ًؚ-ٟ]/g, "").toLowerCase();
+
 export function CategoryPage() {
   const location = useLocation();
   const category = location.pathname.replace("/", "") as Category;
   const { addToCart, cart, updateCart } = useOutletContext<{
-    addToCart: (p: Product) => void;
+    addToCart: (p: Product, size?: import("../types").SizeOption) => void;
     cart: import("../types").CartItem[];
     updateCart: (id: string, qty: number) => void;
   }>();
@@ -21,6 +23,15 @@ export function CategoryPage() {
   const [search, setSearch] = useState("");
   const [showInStock, setShowInStock] = useState(false);
   const [catImages, setCatImages] = useState<typeof INIT_SITE_INFO.categoryImages | null>(null);
+
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      interior: "أصباغ داخلية — النسرين",
+      exterior: "أصباغ خارجية — النسرين",
+      materials: "مواد بناء — النسرين",
+    };
+    document.title = titles[category] ?? "النسرين - للأصباغ ومواد البناء";
+  }, [category]);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);
@@ -39,7 +50,7 @@ export function CategoryPage() {
       .filter((p) => p.category === category)
       .filter((p) =>
         search
-          ? p.name.includes(search) || p.description.includes(search)
+          ? normalize(p.name).includes(normalize(search)) || normalize(p.subcategory).includes(normalize(search))
           : true
       )
       .filter((p) => (showInStock ? p.inStock : true));

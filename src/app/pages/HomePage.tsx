@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useOutletContext } from "react-router";
+
 import { ChevronRight, Star, Package, Shield, TrendingUp } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
@@ -11,13 +12,17 @@ import { subscribeToProducts, subscribeToSiteInfo } from "../../lib/firestore";
 
 export function HomePage() {
   const { addToCart, cart, updateCart } = useOutletContext<{
-    addToCart: (p: Product) => void;
+    addToCart: (p: Product, size?: import("../types").SizeOption) => void;
     cart: import("../types").CartItem[];
     updateCart: (id: string, qty: number) => void;
   }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [catImages, setCatImages] = useState<typeof INIT_SITE_INFO.categoryImages | null>(null);
+
+  useEffect(() => {
+    document.title = "النسرين - للأصباغ ومواد البناء";
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToProducts(setProducts);

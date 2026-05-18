@@ -13,7 +13,7 @@ export function ProductModal({
 }: {
   product: Product;
   onClose: () => void;
-  onAdd: (p: Product) => void;
+  onAdd: (p: Product, size?: import("../types").SizeOption) => void;
 }) {
   const [whatsapp, setWhatsapp] = useState(INIT_SITE_INFO.whatsappNumber);
 
@@ -51,6 +51,7 @@ export function ProductModal({
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
             {!product.inStock && (
@@ -119,7 +120,7 @@ export function ProductModal({
             </div>
 
             <button
-              onClick={() => { for (let i = 0; i < qty; i++) onAdd(product); onClose(); }}
+              onClick={() => { for (let i = 0; i < qty; i++) onAdd(product, selectedSize ?? undefined); onClose(); }}
               disabled={!product.inStock}
               className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-xl hover:bg-primary/90 active:scale-98 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >

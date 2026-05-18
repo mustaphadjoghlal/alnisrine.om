@@ -1,5 +1,5 @@
 import { Plus, Minus, Eye, ShoppingCart } from "lucide-react";
-import type { Product } from "../types";
+import type { Product, SizeOption } from "../types";
 import { StarRating } from "./StarRating";
 
 export function ProductCard({
@@ -11,7 +11,7 @@ export function ProductCard({
 }: {
   product: Product;
   cartQty?: number;
-  onAdd: (p: Product) => void;
+  onAdd: (p: Product, size?: SizeOption) => void;
   onUpdate?: (id: string, qty: number) => void;
   onView: (p: Product) => void;
 }) {
@@ -25,6 +25,7 @@ export function ProductCard({
         <img
           src={product.image}
           alt={product.name}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         {product.featured && (
@@ -88,7 +89,7 @@ export function ProductCard({
                 {cartQty}
               </span>
               <button
-                onClick={() => onAdd(product)}
+                onClick={() => onAdd(product, product.sizes[0])}
                 className="px-2 py-1.5 text-green-700 hover:bg-green-100 transition-colors"
               >
                 <Plus size={12} />
@@ -96,7 +97,7 @@ export function ProductCard({
             </div>
           ) : (
             <button
-              onClick={() => onAdd(product)}
+              onClick={() => onAdd(product, product.sizes[0])}
               disabled={!product.inStock}
               className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
             >

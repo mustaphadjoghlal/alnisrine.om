@@ -15,7 +15,7 @@ export function CartDrawer({
   onRemove: (id: string) => void;
   checkoutUrl: string;
 }) {
-  const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
+  const total = cart.reduce((s, i) => s + (i.selectedSize?.price ?? i.product.price) * i.quantity, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
@@ -56,10 +56,10 @@ export function CartDrawer({
                       {item.product.name}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      {item.product.sizes[0]?.label ?? ""}
+                      {item.selectedSize?.label ?? item.product.sizes[0]?.label ?? ""}
                     </p>
                     <p className="text-sm font-black text-primary mt-1">
-                      {(item.product.price * item.quantity).toFixed(3)} ر.ع
+                      {((item.selectedSize?.price ?? item.product.price) * item.quantity).toFixed(3)} ر.ع
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <button

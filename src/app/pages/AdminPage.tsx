@@ -22,7 +22,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebas
 import { auth } from "../../lib/firebase";
 import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors, subscribeToBranches, saveBranches } from "../../lib/firestore";
 
-import { uploadCategoryImage } from "../../lib/storage";
+import { uploadCategoryImage, deleteProductImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo, Branch } from "../types";
 import { CAT_LABELS, INIT_SITE_INFO, BRANCHES } from "../constants";
@@ -182,7 +182,11 @@ export function AdminPage() {
 
   const handleDelete = async (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+      const product = products.find((p) => p.id === id);
       await deleteProduct(id);
+      if (product?.image) {
+        await deleteProductImage(product.image);
+      }
     }
   };
 

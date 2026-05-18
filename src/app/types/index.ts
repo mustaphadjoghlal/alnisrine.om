@@ -41,6 +41,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize?: SizeOption;
 }
 
 // Service Requests
