@@ -9,6 +9,10 @@ export function AboutPage() {
   const [info, setInfo] = useState<SiteInfo>(INIT_SITE_INFO);
 
   useEffect(() => {
+    document.title = "من نحن — النسرين";
+  }, []);
+
+  useEffect(() => {
     const unsub = subscribeToSiteInfo(setInfo);
     return unsub;
   }, []);

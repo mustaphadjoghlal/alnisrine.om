@@ -9,6 +9,10 @@ export function ContactPage() {
   const [info, setInfo] = useState<SiteInfo>(INIT_SITE_INFO);
 
   useEffect(() => {
+    document.title = "اتصل بنا — النسرين";
+  }, []);
+
+  useEffect(() => {
     const unsub = subscribeToSiteInfo(setInfo);
     return unsub;
   }, []);
