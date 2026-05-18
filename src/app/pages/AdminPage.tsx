@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   LogOut,
   Lock,
@@ -16,12 +16,12 @@ import {
   RotateCcw,
   Building2,
   X,
-  Download,
+  FileUp,
 } from "lucide-react";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { subscribeToProducts, saveProduct, deleteProduct, subscribeToSiteInfo, saveSiteInfo, saveCategoryImage, saveThemeColors, subscribeToBranches, saveBranches } from "../../lib/firestore";
-import { seedExteriorProducts } from "../../lib/seedExterior";
+
 import { uploadCategoryImage } from "../../lib/storage";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, SiteInfo, Branch } from "../types";
@@ -57,8 +57,9 @@ export function AdminPage() {
   const [newBranchEn, setNewBranchEn] = useState("");
   const [editingBranchIdx, setEditingBranchIdx] = useState<number | null>(null);
 
-  const [seeding, setSeeding] = useState(false);
-  const [seedDone, setSeedDone] = useState(false);
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvResult, setCsvResult] = useState<string | null>(null);
+  const csvFileRef = useRef<HTMLInputElement>(null);
 
   const { colors: themeColors, save: saveTheme, reset: resetTheme } = useTheme();
   const [draftColors, setDraftColors] = useState<ThemeColors>({ ...themeColors });
@@ -69,6 +70,51 @@ export function AdminPage() {
     saveTheme(draftColors);
     setThemeSaved(true);
     setTimeout(() => setThemeSaved(false), 2500);
+  };
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvImporting(true);
+    setCsvResult(null);
+    try {
+      const text = await file.text();
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+      let added = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+        const row: Record<string, string> = {};
+        headers.forEach((h, j) => { row[h] = vals[j] ?? ""; });
+        if (!row["name"]) continue;
+        const price = parseFloat(row["price"]) || 0;
+        const product: Product = {
+          id: `csv_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          name: row["name"],
+          description: row["description"] || "",
+          price,
+          image: row["image"] || "",
+          category: (row["category"] as Product["category"]) || "interior",
+          subcategory: row["subcategory"] || "",
+          sizes: price > 0 ? [{ label: row["size"] || "علبة", price }] : [],
+          inStock: row["inStock"] !== "false",
+          featured: row["featured"] === "true",
+          rating: parseFloat(row["rating"]) || 4.5,
+          reviews: parseInt(row["reviews"]) || 0,
+          unit: row["unit"] || "علبة",
+        };
+        await saveProduct(product);
+        added++;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      setCsvResult(`✅ تمت إضافة ${added} منتج بنجاح`);
+    } catch (err) {
+      setCsvResult(`❌ فشل الاستيراد: ${String(err)}`);
+    } finally {
+      setCsvImporting(false);
+      e.target.value = "";
+      setTimeout(() => setCsvResult(null), 6000);
+    }
   };
 
   const handleResetTheme = () => {
@@ -318,24 +364,24 @@ export function AdminPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-foreground">إدارة المنتجات</h2>
                 <div className="flex items-center gap-2">
-                  {seedDone && (
-                    <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">✓ تمت الإضافة</span>
+                  {csvResult && (
+                    <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">{csvResult}</span>
                   )}
                   <button
-                    onClick={async () => {
-                      if (!window.confirm("سيتم إضافة 15 منتج خارجي من جوتن. هل تريد المتابعة؟")) return;
-                      setSeeding(true);
-                      await seedExteriorProducts();
-                      setSeeding(false);
-                      setSeedDone(true);
-                      setTimeout(() => setSeedDone(false), 5000);
-                    }}
-                    disabled={seeding}
-                    className="bg-amber-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 disabled:opacity-60 text-sm"
+                    onClick={() => csvFileRef.current?.click()}
+                    disabled={csvImporting}
+                    className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-60 text-sm"
                   >
-                    {seeding ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                    {seeding ? "جارٍ الاستيراد..." : "استيراد منتجات جوتن"}
+                    {csvImporting ? <Loader2 size={16} className="animate-spin" /> : <FileUp size={16} />}
+                    {csvImporting ? "جارٍ الاستيراد..." : "استيراد CSV"}
                   </button>
+                  <input
+                    ref={csvFileRef}
+                    type="file"
+                    accept=".csv"
+                    className="hidden"
+                    onChange={handleCsvImport}
+                  />
                   <button
                     onClick={() => { setEditingProduct(null); setShowForm(true); }}
                     className="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2"

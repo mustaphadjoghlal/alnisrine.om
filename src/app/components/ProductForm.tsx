@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { X, Check, Plus, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Check, Plus, Trash2, Upload, Loader2 } from "lucide-react";
 import type { Product, Category, SizeOption } from "../types";
+import { uploadProductImage } from "../../lib/storage";
 
 const EMPTY_FORM: Omit<Product, "id"> = {
   name: "",
@@ -32,6 +33,23 @@ export function ProductForm({
 
   const [sizeLabel, setSizeLabel] = useState("");
   const [sizePrice, setSizePrice] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const productId = initial?.id || `new_${Date.now()}`;
+      const url = await uploadProductImage(file, productId);
+      set("image", url);
+    } catch {
+      alert("فشل رفع الصورة. تحقق من إعدادات Firebase Storage.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const set = (key: keyof Omit<Product, "id">, val: unknown) =>
     setForm((f) => ({ ...f, [key]: val }));
@@ -195,21 +213,32 @@ export function ProductForm({
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-foreground mb-1 block">رابط الصورة *</label>
-            <input
-              value={form.image}
-              onChange={(e) => set("image", e.target.value)}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-              placeholder="https://..."
-              dir="ltr"
-            />
-            {form.image && (
-              <img
-                src={form.image}
-                alt="معاينة"
-                className="mt-2 h-20 w-20 object-cover rounded-lg border border-border"
+            <label className="text-sm font-semibold text-foreground mb-1 block">صورة المنتج *</label>
+            <div className="flex items-center gap-3">
+              {form.image && (
+                <img
+                  src={form.image}
+                  alt="معاينة"
+                  className="h-20 w-20 object-cover rounded-lg border border-border flex-shrink-0"
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-2 border-2 border-dashed border-border rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:border-blue-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+              >
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                {uploading ? "جارٍ الرفع..." : form.image ? "تغيير الصورة" : "رفع صورة"}
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
               />
-            )}
+            </div>
           </div>
 
           <div className="flex gap-4">
